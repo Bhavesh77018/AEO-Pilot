@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { CheckoutButton } from "@/components/billing/CheckoutButton";
+import { getBillingConfig } from "@/lib/billing";
 import { PLANS } from "@/lib/pricing";
 import { Reveal } from "./Reveal";
 
 export function Pricing() {
   const [annual, setAnnual] = useState(false);
+  const [billingEnabled, setBillingEnabled] = useState(false);
+
+  useEffect(() => {
+    getBillingConfig()
+      .then((c) => setBillingEnabled(c.enabled))
+      .catch(() => setBillingEnabled(false));
+  }, []);
 
   return (
     <div>
@@ -32,6 +41,7 @@ export function Pricing() {
       <div className="grid gap-5 lg:grid-cols-4">
         {PLANS.map((plan, i) => {
           const price = annual ? plan.annual : plan.monthly;
+          const isPaid = price !== null && price > 0;
           return (
             <Reveal key={plan.id} delay={i * 80}>
               <div
@@ -56,27 +66,36 @@ export function Pricing() {
                     <span className="text-3xl font-black text-white">Free</span>
                   ) : (
                     <>
-                      <span className="text-3xl font-black text-white">${price}</span>
+                      <span className="text-3xl font-black text-white">
+                        ₹{price.toLocaleString("en-IN")}
+                      </span>
                       <span className="text-sm text-white/40">/mo</span>
                     </>
                   )}
                 </div>
-                {annual && price !== null && price > 0 && (
-                  <div className="mt-0.5 text-[11px] text-emerald-400">
-                    billed annually
-                  </div>
+                {annual && isPaid && (
+                  <div className="mt-0.5 text-[11px] text-emerald-400">billed annually</div>
                 )}
 
-                <Link
-                  href={plan.ctaHref}
-                  className={`mt-5 w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
-                    plan.highlight
-                      ? "bg-brand-500 text-white hover:bg-brand-400"
-                      : "border border-white/15 text-white/80 hover:bg-white/5"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {/* CTA: paid plans → Razorpay checkout; free/custom → link */}
+                {isPaid ? (
+                  <CheckoutButton
+                    plan={plan}
+                    period={annual ? "annual" : "monthly"}
+                    enabled={billingEnabled}
+                  />
+                ) : (
+                  <Link
+                    href={plan.ctaHref}
+                    className={`mt-5 block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
+                      plan.highlight
+                        ? "bg-brand-500 text-white hover:bg-brand-400"
+                        : "border border-white/15 text-white/80 hover:bg-white/5"
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                )}
 
                 {/* limits */}
                 <div className="mt-6 space-y-2 border-t border-white/10 pt-5">
@@ -104,8 +123,9 @@ export function Pricing() {
       </div>
 
       <p className="mt-8 text-center text-xs text-white/35">
-        Bring your own OpenAI / Anthropic / Gemini key on any plan — then the AI
-        compute is on you and token limits don&apos;t apply. No credit card to start.
+        Prices in INR, billed securely via Razorpay. Bring your own OpenAI /
+        Anthropic / Gemini key on any plan — then AI compute is on you and token
+        limits don&apos;t apply.
       </p>
     </div>
   );

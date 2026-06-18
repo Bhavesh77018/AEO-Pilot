@@ -199,3 +199,31 @@ class VisibilityCheck(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     run: Mapped["MonitoringRun"] = relationship(back_populates="checks")
+
+
+# ── Billing (Razorpay) ────────────────────────────────────────────────
+class Subscription(Base):
+    """A billing record created when a user starts checkout for a plan.
+
+    Tied to the buyer's email (passed from the authenticated frontend). Moves
+    created → active once Razorpay confirms payment and the signature verifies.
+    """
+
+    __tablename__ = "subscriptions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    email: Mapped[str | None] = mapped_column(String(255), index=True, nullable=True)
+    plan: Mapped[str] = mapped_column(String(32))          # growth | agency | ...
+    period: Mapped[str] = mapped_column(String(16))        # monthly | annual
+    amount: Mapped[int] = mapped_column(Integer)           # smallest unit (paise)
+    currency: Mapped[str] = mapped_column(String(8), default="INR")
+    status: Mapped[str] = mapped_column(String(16), default="created")  # created|active|failed
+
+    razorpay_order_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    razorpay_payment_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    razorpay_signature: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, onupdate=_now
+    )

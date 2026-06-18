@@ -120,3 +120,37 @@ class MonitoringRunDetail(MonitoringRunSummary):
     error: str | None
     engines: list[str] | None
     checks: list[VisibilityCheckOut] = []
+
+
+# ── Billing (Razorpay) ────────────────────────────────────────────────
+class BillingConfig(BaseModel):
+    enabled: bool
+    key_id: str | None = None
+    currency: str = "INR"
+
+
+class OrderCreate(BaseModel):
+    plan: str
+    period: str = "monthly"
+    email: str | None = None
+
+
+class OrderOut(BaseModel):
+    subscription_id: str
+    order_id: str
+    amount: int
+    currency: str
+    key_id: str
+    plan: str
+    period: str
+
+
+class PaymentVerify(BaseModel):
+    subscription_id: str
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class PaymentResult(BaseModel):
+    status: str  # active | failed

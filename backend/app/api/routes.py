@@ -13,10 +13,15 @@ from ..agents.ai_monitor import run_monitoring
 from ..agents.orchestrator import run_scan
 from ..config import settings
 from ..db import SessionLocal, get_db
-from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan
+from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan, Subscription
 from ..schemas import (
+    BillingConfig,
     MonitoringRunDetail,
     MonitoringRunSummary,
+    OrderCreate,
+    OrderOut,
+    PaymentResult,
+    PaymentVerify,
     ProjectCreate,
     ProjectOut,
     PromptCreate,
@@ -25,7 +30,7 @@ from ..schemas import (
     ScanDetail,
     ScanSummary,
 )
-from ..services import prompt_suggester, service_offer
+from ..services import billing, prompt_suggester, service_offer
 
 router = APIRouter(prefix="/api/v1")
 
@@ -201,6 +206,71 @@ def get_monitoring_run(run_id: str, db: Session = Depends(get_db)):
     if not run:
         raise HTTPException(404, "Monitoring run not found")
     return run
+
+
+# ── Billing (Razorpay) ────────────────────────────────────────────────
+@router.get("/billing/config", response_model=BillingConfig)
+def billing_config():
+    return BillingConfig(
+        enabled=billing.is_enabled(),
+        key_id=settings.razorpay_key_id if billing.is_enabled() else None,
+        currency=billing.CURRENCY,
+    )
+
+
+@router.post("/billing/order", response_model=OrderOut)
+def create_order(body: OrderCreate, db: Session = Depends(get_db)):
+    if not billing.is_enabled():
+        raise HTTPException(503, "Billing is not configured")
+    try:
+        amount = billing.amount_paise(body.plan, body.period)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    sub = Subscription(
+        email=body.email, plan=body.plan, period=body.period,
+        amount=amount, currency=billing.CURRENCY, status="created",
+    )
+    db.add(sub)
+    db.flush()  # get sub.id for the receipt
+
+    try:
+        order = billing.create_order(
+            amount=amount, receipt=f"sub_{sub.id[:18]}",
+            notes={"plan": body.plan, "period": body.period, "email": body.email or ""},
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(502, f"Razorpay order creation failed: {e}")
+
+    sub.razorpay_order_id = order["id"]
+    db.commit()
+    db.refresh(sub)
+
+    return OrderOut(
+        subscription_id=sub.id, order_id=order["id"], amount=amount,
+        currency=billing.CURRENCY, key_id=settings.razorpay_key_id,
+        plan=body.plan, period=body.period,
+    )
+
+
+@router.post("/billing/verify", response_model=PaymentResult)
+def verify_payment(body: PaymentVerify, db: Session = Depends(get_db)):
+    sub = db.get(Subscription, body.subscription_id)
+    if not sub:
+        raise HTTPException(404, "Subscription not found")
+
+    ok = billing.verify_signature(
+        body.razorpay_order_id, body.razorpay_payment_id, body.razorpay_signature
+    )
+    sub.razorpay_payment_id = body.razorpay_payment_id
+    sub.razorpay_signature = body.razorpay_signature
+    sub.status = "active" if ok else "failed"
+    db.commit()
+
+    if not ok:
+        raise HTTPException(400, "Payment signature verification failed")
+    return PaymentResult(status="active")
 
 
 # ── helpers ───────────────────────────────────────────────────────────

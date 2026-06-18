@@ -28,6 +28,15 @@ class Settings(BaseSettings):
     perplexity_api_key: str | None = None
     embedding_model: str = "text-embedding-3-small"
 
+    # Payments (Razorpay). When unset, billing endpoints report disabled and
+    # the frontend keeps the plan CTAs as plain links — nothing breaks.
+    razorpay_key_id: str | None = None
+    razorpay_key_secret: str | None = None
+
+    @property
+    def razorpay_enabled(self) -> bool:
+        return bool(self.razorpay_key_id and self.razorpay_key_secret)
+
     # AI Monitoring (Phase 2). Engines swept per visibility run; each is probed
     # live if its backing provider has a key, else deterministically simulated.
     monitored_engines: list[str] = [

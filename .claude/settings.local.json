@@ -21,7 +21,23 @@
       "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(curl -s http://localhost:3000/login)",
       "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}\\\\n' https://kcqmuhspbaojwghhbagd.supabase.co/auth/v1/settings -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')",
-      "Bash(curl -s https://kcqmuhspbaojwghhbagd.supabase.co/auth/v1/settings -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')"
+      "Bash(curl -s https://kcqmuhspbaojwghhbagd.supabase.co/auth/v1/settings -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')",
+      "Bash(git branch *)",
+      "Bash(git commit *)",
+      "Bash(./.venv/Scripts/python.exe -c ' *)",
+      "Bash(nslookup -type=A db.kcqmuhspbaojwghhbagd.supabase.co)",
+      "Bash(nslookup -type=AAAA db.kcqmuhspbaojwghhbagd.supabase.co)",
+      "Bash(nslookup aws-0-us-east-1.pooler.supabase.com)",
+      "Bash(curl -sI https://kcqmuhspbaojwghhbagd.supabase.co/rest/v1/ -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')",
+      "Bash(powershell.exe -Command 'Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }')",
+      "Bash(APP_ENV=development ./.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000)",
+      "Bash(echo \"pid $!\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s -m 10 http://127.0.0.1:8000/health)",
+      "Bash(claude mcp *)",
+      "Bash(echo \"restarting backend, pid $!\")",
+      "Bash(curl -s -m 10 http://127.0.0.1:8000/api/v1/billing/config)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" -X POST http://127.0.0.1:8000/api/v1/billing/order -H \"Content-Type: application/json\" -d '{\"plan\":\"growth\",\"period\":\"monthly\"}')"
     ]
   }
 }

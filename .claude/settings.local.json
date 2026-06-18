@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($py = \\(Get-Command python -ErrorAction SilentlyContinue\\); $node = \\(Get-Command node -ErrorAction SilentlyContinue\\); $docker = \\(Get-Command docker -ErrorAction SilentlyContinue\\); \"python: $\\($py.Source\\)\"; \"node: $\\($node.Source\\)\"; \"docker: $\\($docker.Source\\)\"; if\\($py\\){ python --version }; if\\($node\\){ node --version })",
+      "PowerShell(cd C:\\\\Users\\\\Bhavesh.aggarwal\\\\AEO\\\\frontend; npm install next@14.2.35 --no-audit --no-fund 2>&1 | Select-Object -Last 6; \"EXIT: $LASTEXITCODE\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(npm --version)",
+      "Bash(git config *)",
+      "Bash(git ls-remote *)",
+      "Bash(npm install *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(HOST=127.0.0.1 npm run dev)",
+      "Bash(echo \"started dev, pid $!\")",
+      "Bash(powershell.exe -Command '\\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\) -ne $null')",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} location=%{redirect_url}\\\\n\" http://localhost:3000/app)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code} location=%{redirect_url}\\\\n\" http://localhost:3000/scans/abc)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}\\\\n' https://kcqmuhspbaojwghhbagd.supabase.co/auth/v1/settings -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')",
+      "Bash(curl -s https://kcqmuhspbaojwghhbagd.supabase.co/auth/v1/settings -H 'apikey: sb_publishable_JkmtofY1lxzT-5-TiOw8-A_xWlW1YYx')"
+    ]
+  }
+}

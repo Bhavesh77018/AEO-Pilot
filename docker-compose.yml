@@ -1,0 +1,69 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aeo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aeo}
+      POSTGRES_DB: ${POSTGRES_DB:-aeo}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aeo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aeo}:${POSTGRES_PASSWORD:-aeo}@db:5432/${POSTGRES_DB:-aeo}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  # Celery worker — scaffolded for async scans. MVP runs scans inline,
+  # so this is optional; uncomment to exercise the background path.
+  # worker:
+  #   build: ./backend
+  #   env_file: .env
+  #   environment:
+  #     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aeo}:${POSTGRES_PASSWORD:-aeo}@db:5432/${POSTGRES_DB:-aeo}
+  #     REDIS_URL: redis://redis:6379/0
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   command: celery -A app.worker.celery_app worker --loglevel=info
+
+  frontend:
+    build: ./frontend
+    environment:
+      # Browser talks to backend on localhost; SSR inside the container
+      # would use http://backend:8000 (handled in lib/api.ts).
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      BACKEND_INTERNAL_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:

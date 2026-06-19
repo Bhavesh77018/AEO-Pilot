@@ -1,5 +1,11 @@
 import { Footer } from "@/components/marketing/Footer";
 import { Nav } from "@/components/marketing/Nav";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  organizationSchema,
+  softwareApplicationSchema,
+  websiteSchema,
+} from "@/lib/structured-data";
 
 export default function MarketingLayout({
   children,
@@ -8,6 +14,8 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="relative overflow-x-hidden">
+      {/* Site-wide structured data — brand entity + product + search */}
+      <JsonLd data={[organizationSchema(), websiteSchema(), softwareApplicationSchema()]} />
       {/* ambient animated blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-40 top-0 h-[34rem] w-[34rem] rounded-full bg-brand-600/20 blur-3xl animate-blob" />

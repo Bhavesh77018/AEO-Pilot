@@ -11,18 +11,19 @@ const COLS = [
     ],
   },
   {
-    title: "Engines",
+    title: "Resources",
     links: [
-      { label: "ChatGPT & GPT Search", href: "/#engines" },
-      { label: "Gemini & Claude", href: "/#engines" },
-      { label: "Perplexity & Copilot", href: "/#engines" },
-      { label: "Grok & DeepSeek", href: "/#engines" },
+      { label: "What is AEO?", href: "/learn" },
+      { label: "AEO Guides", href: "/guides" },
+      { label: "AEO vs SEO", href: "/comparisons" },
+      { label: "Glossary", href: "/glossary" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "FAQ", href: "/#faq" },
+      { label: "Use cases", href: "/use-cases" },
+      { label: "FAQ", href: "/faq" },
       { label: "API docs", href: "http://localhost:8000/docs" },
       { label: "Contact sales", href: "mailto:sales@aeopilot.example" },
     ],

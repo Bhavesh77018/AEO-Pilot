@@ -38,10 +38,19 @@ router = APIRouter(prefix="/api/v1")
 # ── Projects ──────────────────────────────────────────────────────────
 @router.post("/projects", response_model=ProjectOut, status_code=201)
 def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
-    domain = body.domain.strip().replace("https://", "").replace("http://", "").strip("/")
-    if not domain or "." not in domain:
+    raw = body.domain.strip().rstrip("/")
+    host = raw.replace("https://", "").replace("http://", "").split("/")[0]
+    hostname = host.split(":")[0]
+    is_local = hostname in ("localhost", "127.0.0.1")
+    if not host or ("." not in hostname and not is_local):
         raise HTTPException(422, "Provide a valid domain, e.g. stripe.com")
-    project = Project(name=body.name or domain, domain=domain)
+    # Keep the scheme for local hosts (dev servers are http, no TLS); for public
+    # domains store the bare host (the crawler defaults to https).
+    if is_local:
+        domain = raw if raw.startswith(("http://", "https://")) else "http://" + raw
+    else:
+        domain = host
+    project = Project(name=body.name or host, domain=domain)
     db.add(project)
     db.commit()
     db.refresh(project)

@@ -4,6 +4,8 @@ import { Faq } from "@/components/marketing/Faq";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
 import { Pricing } from "@/components/marketing/Pricing";
 import { Reveal } from "@/components/marketing/Reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/structured-data";
 
 const STATS = [
   { value: "8+", label: "Answer engines tracked" },
@@ -56,6 +58,8 @@ const ENGINES = [
 export default function LandingPage() {
   return (
     <>
+      <JsonLd data={faqSchema()} />
+
       {/* ───────── Hero ───────── */}
       <section className="mx-auto max-w-7xl px-6 pb-10 pt-16 sm:pt-24">
         <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -121,6 +125,29 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ───────── What is AEO Pilot (answer-optimized definition) ───────── */}
+      <section id="what" className="mx-auto max-w-3xl scroll-mt-20 px-6 py-16">
+        <Reveal>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            What is AEO Pilot?
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-white/70">
+            <strong className="text-white">AEO Pilot</strong> is an Answer Engine
+            Optimization platform that audits your website, scores its AI-readiness
+            across 8 categories, and monitors whether ChatGPT, Gemini, Claude and
+            Perplexity actually mention, rank, and cite your brand. It then
+            generates the fixes — structured data, FAQs, an entity graph, and a
+            knowledge hub — that get you into AI-generated answers.
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-white/45">
+            Where SEO optimizes for Google&apos;s ten blue links, AEO optimizes
+            for the single answer an AI assistant gives. As buyers shift from
+            searching to asking, the brands cited in those answers win the
+            consideration — and AEO Pilot is how you become one of them.
+          </p>
+        </Reveal>
       </section>
 
       {/* ───────── How it works ───────── */}

@@ -1,0 +1,48 @@
+# AEO Pilot
+
+> AEO Pilot is the growth platform for Answer Engine Optimization (AEO). It helps
+> startups, SaaS companies, agencies and brands become discoverable, mentioned,
+> ranked, and cited inside AI answer engines — ChatGPT, GPT Search, Gemini,
+> Claude, Perplexity, Copilot, Grok and DeepSeek — rather than only ranking on
+> Google's blue links.
+
+## What AEO Pilot does (the logic of use)
+
+1. You enter a domain.
+2. AEO Pilot crawls the site and extracts on-page signals (schema, FAQ, headings,
+   metadata, internal links, knowledge pages).
+3. It computes an AEO score across 8 categories: Technical AEO, Entity Strength,
+   Topical Authority, Schema Coverage, Answerability, AI Readability, Citation
+   Readiness, and Knowledge Coverage (0–100 each, weighted into an overall score).
+4. The AI Monitoring Agent prompts each answer engine with real buyer questions and
+   measures whether the brand is mentioned, at what rank, and whether it is cited —
+   producing measured per-engine visibility and Share of AI Voice.
+5. It returns prioritized, impact-ranked recommendations, and can generate the
+   fixes (schema, FAQ corpora, entity graph, knowledge hub) or have its experts
+   implement them via a Done-For-You service.
+
+## Key facts
+
+- AEO (Answer Engine Optimization) = optimizing so AI assistants cite your brand
+  in their single generated answer. It is the successor discipline to SEO for the
+  era of AI search.
+- AEO Pilot scores 8 categories and tracks 8+ answer engines.
+- Pricing (INR, billed via Razorpay): Starter (Free), Growth (₹3,999/mo),
+  Agency (₹15,999/mo), Enterprise (custom).
+- The platform runs with zero API keys (heuristic scoring); adding an LLM key
+  unlocks live monitoring and AI-written content.
+
+## Pages
+
+- [Home](/): product overview and AI visibility dashboard.
+- [What is AEO](/learn): definition of Answer Engine Optimization and how AEO Pilot works.
+- [AEO Guides](/guides): playbooks to get cited by AI answer engines.
+- [AEO vs SEO](/comparisons): how optimizing for answers differs from optimizing for links.
+- [AEO Glossary](/glossary): the vocabulary of Answer Engine Optimization.
+- [Use Cases](/use-cases): how different teams use AEO Pilot.
+- [FAQ](/faq): common questions about AEO and AEO Pilot.
+
+## Contact
+
+- Website: https://github.com/Bhavesh77018/AEO-Pilot
+- Email: hello@aeopilot.example

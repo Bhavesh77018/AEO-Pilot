@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 const LINKS = [
   { href: "/#how", label: "How it works" },
   { href: "/#features", label: "Features" },
-  { href: "/#engines", label: "Engines" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/learn", label: "Learn" },
+  { href: "/faq", label: "FAQ" },
 ];
 
 export function Nav() {

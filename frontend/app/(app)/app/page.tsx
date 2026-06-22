@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { ChatDashboard } from "@/components/app/ChatDashboard";
+import { AdminNavLink } from "@/components/app/AdminNavLink";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import Link from "next/link";
@@ -138,6 +139,7 @@ export default function AppPage() {
               <UpgradeIcon size={16} />
               Upgrade Now
             </Link>
+            <AdminNavLink />
             {userEmail && (
               <div className="text-xs text-white/60 truncate px-2 py-2">
                 {userEmail}

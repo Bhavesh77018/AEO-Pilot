@@ -33,6 +33,20 @@ export async function logUserQuery(input: {
   }
 }
 
+export type QueryStatus = "new" | "reviewed" | "in_progress" | "resolved" | "archived";
+
+/** Admin-only: change a query's triage status (RLS enforces admin). */
+export async function updateQueryStatus(id: string, status: QueryStatus): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.from("user_queries").update({ status }).eq("id", id);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 /** Anonymous launch waitlist capture → `public.waitlist`. */
 export async function joinWaitlist(email: string, source = "landing"): Promise<boolean> {
   if (!isSupabaseConfigured || !email?.includes("@")) return false;

@@ -120,6 +120,11 @@ drop policy if exists "queries_select_own" on public.user_queries;
 create policy "queries_select_own" on public.user_queries
   for select using (auth.uid() = user_id or public.is_admin());
 
+-- admins can triage queries (change status: reviewed / resolved / …).
+drop policy if exists "queries_admin_update" on public.user_queries;
+create policy "queries_admin_update" on public.user_queries
+  for update using (public.is_admin()) with check (public.is_admin());
+
 -- waitlist: anyone may join; only admins may read.
 drop policy if exists "waitlist_anyone_insert" on public.waitlist;
 create policy "waitlist_anyone_insert" on public.waitlist
@@ -144,7 +149,7 @@ group by p.id;
 -- ── 6. GRANTS ───────────────────────────────────────────────────────────────
 grant usage on schema public to anon, authenticated;
 grant select, update on public.profiles     to authenticated;
-grant select, insert on public.user_queries to authenticated;
+grant select, insert, update on public.user_queries to authenticated;
 grant insert          on public.waitlist     to anon, authenticated;
 
 -- ── 7. (OPTIONAL) Make yourself an admin — replace the email, then run ──────

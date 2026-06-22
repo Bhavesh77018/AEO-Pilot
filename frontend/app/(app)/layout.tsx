@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { FeedbackButton } from "@/components/app/FeedbackButton";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,6 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="h-screen overflow-hidden bg-ink-900">
       {children}
+      <FeedbackButton />
     </div>
   );
 }

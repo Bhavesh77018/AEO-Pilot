@@ -1,138 +1,183 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { Project } from "@/lib/types";
+import { ChatDashboard } from "@/components/app/ChatDashboard";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  PlusIcon,
+  ProjectsIcon,
+  HistoryIcon,
+  UpgradeIcon,
+  AccountIcon,
+} from "@/components/Icons";
 
-function scoreColor(s: number | null) {
-  if (s == null) return "text-white/40";
-  if (s >= 75) return "text-emerald-400";
-  if (s >= 50) return "text-amber-400";
-  return "text-red-400";
-}
+export default function AppPage() {
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [expandedSidebar, setExpandedSidebar] = useState(true);
 
-export default function DashboardPage() {
-  const qc = useQueryClient();
-  const router = useRouter();
-  const [domain, setDomain] = useState("");
+  // Get user email
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setUserEmail(null);
+      return;
+    }
+    const getUser = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setUserEmail(user?.email ?? null);
+      } catch {
+        setUserEmail(null);
+      }
+    };
+    getUser();
+  }, []);
 
   const projects = useQuery({
     queryKey: ["projects"],
     queryFn: api.listProjects,
   });
 
-  const create = useMutation({
-    mutationFn: (d: string) => api.createProject(d),
-    onSuccess: () => {
-      setDomain("");
-      qc.invalidateQueries({ queryKey: ["projects"] });
-    },
-  });
-
-  const scan = useMutation({
-    mutationFn: (projectId: string) => api.startScan(projectId),
-    onSuccess: (s) => router.push(`/scans/${s.id}`),
-  });
-
   return (
-    <div className="space-y-8">
-      {/* Hero / add project */}
-      <section className="card p-8">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Make your startup discoverable by AI
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-white/50">
-          Enter a domain. AEO Pilot crawls it, scores its Answer Engine
-          Optimization across 8 categories, and estimates your visibility inside
-          ChatGPT, Gemini, Claude, Perplexity and more.
-        </p>
-        <form
-          className="mt-5 flex flex-col gap-3 sm:flex-row"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (domain.trim()) create.mutate(domain.trim());
-          }}
-        >
-          <input
-            className="input sm:max-w-md"
-            placeholder="stripe.com"
-            value={domain}
-            onChange={(e) => setDomain(e.target.value)}
-          />
-          <button className="btn-primary" disabled={create.isPending}>
-            {create.isPending ? "Adding…" : "Add project"}
-          </button>
-        </form>
-        {create.isError && (
-          <p className="mt-2 text-xs text-red-400">
-            {(create.error as Error).message}
-          </p>
-        )}
-      </section>
-
-      {/* Projects */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-white/50">
-            Projects
-          </h2>
-          <span className="text-xs text-white/30">
-            {projects.data?.length ?? 0} total
-          </span>
-        </div>
-
-        {projects.isLoading && (
-          <p className="text-sm text-white/40">Loading…</p>
-        )}
-        {projects.isError && (
-          <div className="card p-5 text-sm text-red-400">
-            Couldn&apos;t reach the API at{" "}
-            <code>{process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}</code>.
-            Is the backend running?
-          </div>
-        )}
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.data?.map((p: Project) => (
-            <div key={p.id} className="card flex flex-col gap-4 p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-semibold">{p.name}</div>
-                  <div className="text-xs text-white/40">{p.domain}</div>
-                </div>
-                <div className={`text-2xl font-black tabular-nums ${scoreColor(p.latest_score)}`}>
-                  {p.latest_score != null ? Math.round(p.latest_score) : "—"}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  className="btn-primary flex-1"
-                  disabled={scan.isPending}
-                  onClick={() => scan.mutate(p.id)}
-                >
-                  {scan.isPending ? "Starting…" : "Run scan"}
-                </button>
-                {p.latest_scan_id && (
-                  <button
-                    className="btn-ghost"
-                    onClick={() => router.push(`/scans/${p.latest_scan_id}`)}
-                  >
-                    Latest
-                  </button>
-                )}
-              </div>
+    <div className="flex h-screen overflow-hidden bg-ink-900">
+      {/* Left Sidebar - Inspired by DialforAI design */}
+      <aside
+        className={`${
+          expandedSidebar ? "w-64" : "w-20"
+        } border-r border-white/10 bg-ink-950 overflow-y-auto transition-all duration-300 flex flex-col`}
+      >
+        {/* Branding */}
+        <div className="p-4 border-b border-white/10">
+          <button
+            onClick={() => setExpandedSidebar(!expandedSidebar)}
+            className="w-full flex items-center gap-3 hover:bg-white/5 p-2 rounded-lg transition"
+          >
+            <div className="h-8 w-8 flex-shrink-0 relative">
+              <Image
+                src="/logo.svg"
+                alt="AEO Pilot"
+                fill
+                className="object-contain"
+              />
             </div>
-          ))}
+            {expandedSidebar && (
+              <div className="text-left">
+                <div className="text-sm font-semibold text-white">AEO Pilot</div>
+                <div className="text-xs text-white/50">Beta</div>
+              </div>
+            )}
+          </button>
         </div>
 
-        {projects.data && projects.data.length === 0 && (
-          <div className="card p-8 text-center text-sm text-white/40">
-            No projects yet. Add a domain above to run your first AEO scan.
+        {/* New Chat Button */}
+        {expandedSidebar && (
+          <div className="p-3">
+            <button className="w-full bg-white/10 hover:bg-white/20 text-white rounded-lg py-2 px-3 text-sm font-medium transition flex items-center justify-center gap-2">
+              <PlusIcon size={16} />
+              New Chat
+            </button>
           </div>
         )}
-      </section>
+
+        {/* Navigation Sections */}
+        <div className="px-3 py-4 flex-1 overflow-y-auto">
+          {expandedSidebar && (
+            <>
+              {/* Projects Section */}
+              <div className="mb-6">
+                <div className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2 px-2 flex items-center gap-2">
+                  <ProjectsIcon size={14} />
+                  Projects
+                </div>
+                <nav className="space-y-1">
+                  {Array.isArray(projects.data) && projects.data.length > 0 ? (
+                    projects.data.map((project: any) => (
+                      <button
+                        key={project.id}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition text-left truncate group"
+                        title={project.domain}
+                      >
+                        <div className="text-white/50 group-hover:text-white/70">
+                          <ProjectsIcon size={16} />
+                        </div>
+                        <span className="truncate">{project.domain}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-2 text-xs text-white/50">No projects yet</p>
+                  )}
+                </nav>
+              </div>
+
+              {/* History Section */}
+              <div className="mb-6">
+                <div className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2 px-2 flex items-center gap-2">
+                  <HistoryIcon size={14} />
+                  History
+                </div>
+                <nav className="space-y-1">
+                  <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/5 transition text-left group">
+                    <div className="text-white/50 group-hover:text-white/70">
+                      <HistoryIcon size={16} />
+                    </div>
+                    <span>Recent Scans</span>
+                  </button>
+                </nav>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        {expandedSidebar && (
+          <div className="p-3 border-t border-white/10 space-y-2">
+            <Link
+              href="/#pricing"
+              className="w-full bg-gradient-to-r from-brand-500 to-sky-400 hover:from-brand-600 hover:to-sky-500 text-white text-sm font-semibold py-2 px-3 rounded-lg transition block text-center flex items-center justify-center gap-2"
+            >
+              <UpgradeIcon size={16} />
+              Upgrade Now
+            </Link>
+            {userEmail && (
+              <div className="text-xs text-white/60 truncate px-2 py-2">
+                {userEmail}
+              </div>
+            )}
+            <Link
+              href="/login"
+              className="w-full bg-white/10 hover:bg-white/20 text-white text-sm py-2 px-3 rounded-lg transition block text-center flex items-center justify-center gap-2"
+            >
+              <AccountIcon size={16} />
+              {userEmail ? "Account" : "Sign In"}
+            </Link>
+          </div>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="border-b border-white/10 bg-ink-900/50 backdrop-blur">
+          <div className="px-8 py-6">
+            <h1 className="text-3xl font-bold text-white mb-2">How can I help you today?</h1>
+            <p className="text-sm text-white/60">Analyze your AEO visibility and optimize your presence across AI search engines</p>
+          </div>
+        </header>
+
+        {/* Chat Dashboard */}
+        <ChatDashboard
+          userEmail={userEmail}
+          projects={projects.data ?? []}
+          isLoading={projects.isLoading}
+        />
+      </main>
     </div>
   );
 }

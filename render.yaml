@@ -1,0 +1,39 @@
+# Render Blueprint for the AEO Pilot backend (FastAPI).
+# Deploy: push to GitHub → Render → New → Blueprint → pick this repo.
+# Then set the `sync: false` secrets in the Render dashboard.
+services:
+  - type: web
+    name: aeo-pilot-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /health
+    # Render injects $PORT; bind to it instead of the dev default 8000.
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # Apply DB migrations before each deploy goes live.
+    preDeployCommand: alembic upgrade head
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      # Supabase Postgres (use the IPv4 session pooler connection string).
+      - key: DATABASE_URL
+        sync: false
+      # Comma-separated allowed origins — set to your Vercel URL(s).
+      - key: CORS_ORIGINS
+        sync: false
+      # LLM (optional but recommended for live monitoring + content).
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_API_KEY
+        sync: false
+      # Payments (optional — leave unset to keep billing disabled).
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true

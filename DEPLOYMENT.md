@@ -1,0 +1,81 @@
+# Deploying AEO Pilot
+
+Production runs in three managed pieces that already exist in this repo:
+
+| Piece | Platform | Why |
+|---|---|---|
+| **Frontend** (Next.js) | **Vercel** | First-class Next.js hosting, edge, previews |
+| **Backend** (FastAPI) | **Render** (or Railway/Fly) | Long scans + migrations + background work don't fit Vercel serverless |
+| **Database + Auth** | **Supabase** | Postgres (pgvector) + auth — already wired |
+
+```
+Browser ──▶ Vercel (Next.js) ──NEXT_PUBLIC_API_URL──▶ Render (FastAPI) ──▶ Supabase Postgres
+                  │                                                              ▲
+                  └────────────────── Supabase Auth ────────────────────────────┘
+```
+
+---
+
+## 1. Backend → Render
+
+1. Push this repo to GitHub (already done).
+2. Render → **New → Blueprint** → select this repo. It reads [`render.yaml`](render.yaml).
+3. Set the secret env vars (marked `sync: false`) in the Render dashboard:
+
+   | Var | Value |
+   |---|---|
+   | `DATABASE_URL` | Supabase **session pooler** URL (IPv4). `postgresql+psycopg://postgres.<ref>:<pw>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require` |
+   | `CORS_ORIGINS` | Your Vercel URL, e.g. `https://aeo-pilot.vercel.app` (comma-separate multiples) |
+   | `OPENAI_API_KEY` | `sk-...` (optional — unlocks live monitoring + content) |
+   | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | optional — leave unset to keep billing disabled |
+
+   `SECRET_KEY` is auto-generated; `preDeployCommand` runs `alembic upgrade head` automatically.
+4. Deploy. Confirm `https://<your-app>.onrender.com/health` returns `{"status":"ok"}`.
+
+> ⚠️ Use the Supabase **session pooler** (IPv4) host, NOT the direct `db.<ref>.supabase.co` host — the direct host is IPv6-only and many platforms can't reach it.
+
+## 2. Frontend → Vercel
+
+1. Vercel → **New Project** → import this repo.
+2. **Root Directory: `frontend`** (important — the app is in a subfolder).
+   Framework auto-detects as Next.js; [`frontend/vercel.json`](frontend/vercel.json) adds security headers.
+3. Set Environment Variables (Production **and** Preview):
+
+   | Var | Value |
+   |---|---|
+   | `NEXT_PUBLIC_API_URL` | your Render URL, e.g. `https://aeo-pilot-api.onrender.com` |
+   | `NEXT_PUBLIC_SITE_URL` | your Vercel/custom domain, e.g. `https://aeo-pilot.vercel.app` |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_...` (browser-safe) |
+
+4. Deploy. Then go back to Render and set `CORS_ORIGINS` to the final Vercel domain.
+
+## 3. Supabase auth redirect URLs
+
+Supabase → **Authentication → URL Configuration**:
+- **Site URL**: your Vercel domain.
+- **Redirect URLs**: add `https://<your-domain>/auth/callback` (and the Vercel preview pattern `https://*-<team>.vercel.app/auth/callback` if you use previews).
+
+(Optional) Turn **off** email confirmation for instant sign-in while testing:
+Authentication → Providers → Email → disable "Confirm email".
+
+---
+
+## Environment variable reference
+
+**Frontend (Vercel)** — see [`frontend/.env.example`](frontend/.env.example):
+`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+**Backend (Render)** — see [`.env.example`](.env.example):
+`DATABASE_URL`, `CORS_ORIGINS`, `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY`,
+`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `SECRET_KEY`, `APP_ENV`
+
+## Smoke test after deploy
+
+```bash
+curl https://<render>/health                       # {"status":"ok"}
+curl https://<vercel>/robots.txt                   # welcomes AI crawlers
+curl https://<vercel>/sitemap.xml                  # lists routes
+# In the app: sign up → add a domain → run a scan → see the score.
+```

@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     app_env: str = "development"
     secret_key: str = "change-me-in-prod"
 
+    # CORS — comma-separated allowed origins. Default "*" for dev; in prod set
+    # CORS_ORIGINS to your Vercel URL(s), e.g. "https://aeo-pilot.vercel.app".
+    cors_origins: str = "*"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
     # Storage. Default is a local sqlite file so the API boots even with no
     # Postgres around; docker-compose overrides this with the pgvector DB.
     database_url: str = "sqlite+pysqlite:///./aeo.db"

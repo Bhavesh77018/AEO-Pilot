@@ -4,8 +4,17 @@ import { Faq } from "@/components/marketing/Faq";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
 import { Pricing } from "@/components/marketing/Pricing";
 import { Reveal } from "@/components/marketing/Reveal";
+import { SeoAeoAnimation } from "@/components/marketing/SeoAeoAnimation";
+import { SeoVsAeoComparison } from "@/components/marketing/SeoVsAeoComparison";
+import { ChatPilotInterface } from "@/components/marketing/ChatPilotInterface";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqSchema } from "@/lib/structured-data";
+import {
+  ScanIcon,
+  MonitorIcon,
+  RecommendIcon,
+  CompareIcon,
+} from "@/components/Icons";
 
 const STATS = [
   { value: "8+", label: "Answer engines tracked" },
@@ -19,41 +28,57 @@ const STEPS = [
     n: "01",
     title: "Crawl & understand",
     body: "Drop in a domain. The Website Auditor crawls your pages, metadata, schema, and content to build a semantic picture of your brand.",
-    icon: "🔍",
+    icon: "scan",
   },
   {
     n: "02",
     title: "Score across 8 categories",
     body: "The AEO engine scores Technical AEO, Entity Strength, Schema, Answerability, AI Readability, Citation Readiness and more — 0 to 100.",
-    icon: "📊",
+    icon: "monitor",
   },
   {
     n: "03",
     title: "Monitor the engines",
     body: "The AI Monitoring Agent prompts ChatGPT, Gemini, Claude & Perplexity with real buyer questions and measures your mention rate, rank, and citations.",
-    icon: "📡",
+    icon: "monitor",
   },
   {
     n: "04",
     title: "Fix & grow",
     body: "Get prioritized fixes — or let our Done-For-You team implement schema, FAQ corpora, entity graphs and citation campaigns for you.",
-    icon: "🚀",
+    icon: "recommend",
   },
 ];
 
 const FEATURES = [
-  { icon: "🧠", title: "Entity graph", body: "Map your company, people, products and competitors, then auto-generate JSON-LD that engines trust." },
-  { icon: "❓", title: "FAQ engine", body: "Generate hundreds of intent-clustered, schema-ready FAQs that become the answers LLMs cite." },
-  { icon: "🏆", title: "Competitor intelligence", body: "See which rivals own the AI answers, and the exact authority gaps you can close." },
-  { icon: "📚", title: "Knowledge hub generator", body: "Spin up /faq, /guides, /glossary and /compare pages — AI-readable and human-readable." },
-  { icon: "🔗", title: "Citation builder", body: "Surface the sources, communities and pages where a mention turns into a citation." },
-  { icon: "📈", title: "Visibility tracking", body: "Track mention frequency, ranking, and Share of AI Voice over time, per engine." },
+  { icon: "recommend", title: "Entity graph", body: "Map your company, people, products and competitors, then auto-generate JSON-LD that engines trust." },
+  { icon: "recommend", title: "FAQ engine", body: "Generate hundreds of intent-clustered, schema-ready FAQs that become the answers LLMs cite." },
+  { icon: "compare", title: "Competitor intelligence", body: "See which rivals own the AI answers, and the exact authority gaps you can close." },
+  { icon: "recommend", title: "Knowledge hub generator", body: "Spin up /faq, /guides, /glossary and /compare pages — AI-readable and human-readable." },
+  { icon: "scan", title: "Citation builder", body: "Surface the sources, communities and pages where a mention turns into a citation." },
+  { icon: "monitor", title: "Visibility tracking", body: "Track mention frequency, ranking, and Share of AI Voice over time, per engine." },
 ];
 
 const ENGINES = [
   "ChatGPT", "GPT Search", "Gemini", "Claude",
   "Perplexity", "Copilot", "Grok", "DeepSeek",
 ];
+
+// Helper function to get icon component
+function getIcon(iconName: string) {
+  switch (iconName) {
+    case "scan":
+      return <ScanIcon size={28} className="text-brand-400" />;
+    case "monitor":
+      return <MonitorIcon size={28} className="text-sky-400" />;
+    case "recommend":
+      return <RecommendIcon size={28} className="text-emerald-400" />;
+    case "compare":
+      return <CompareIcon size={28} className="text-amber-400" />;
+    default:
+      return <ScanIcon size={28} className="text-brand-400" />;
+  }
+}
 
 export default function LandingPage() {
   return (
@@ -69,14 +94,16 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60 transition hover:bg-white/10"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              The growth platform for AI Search
+              AI Search is the new frontier
             </Link>
-            <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-              Make your startup{" "}
-              <span className="gradient-text">discoverable by AI</span>.
-            </h1>
+            
+            {/* Animated SEO → AEO transition */}
+            <div className="mt-8 mb-6">
+              <SeoAeoAnimation />
+            </div>
+
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/55">
-              SEO got you ranked on Google. AEO Pilot gets you{" "}
+              SEO got you ranked on Google's blue links. AEO gets you{" "}
               <span className="text-white/80">mentioned, ranked, and cited</span>{" "}
               inside ChatGPT, Gemini, Claude and Perplexity — with an autonomous
               agent fleet that audits, scores, and grows your AI visibility.
@@ -97,7 +124,7 @@ export default function LandingPage() {
               </Link>
             </div>
             <p className="mt-4 text-xs text-white/35">
-              No credit card · runs with zero API keys · your first score in under a minute.
+              2 free projects · zero API keys needed · first score in under a minute.
             </p>
           </div>
 
@@ -125,6 +152,22 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ───────── SEO vs AEO Comparison ───────── */}
+      <SeoVsAeoComparison />
+
+      {/* ───────── Chat Pilot Interface ───────── */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <Reveal className="mb-12 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Meet your AEO Pilot
+          </h2>
+          <p className="mt-4 text-white/50">
+            Conversational scanning. Instant AEO insights. Every project in one place.
+          </p>
+        </Reveal>
+        <ChatPilotInterface />
       </section>
 
       {/* ───────── What is AEO Pilot (answer-optimized definition) ───────── */}
@@ -167,7 +210,7 @@ export default function LandingPage() {
             <Reveal key={s.n} delay={i * 90}>
               <div className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-brand-500/40 hover:bg-white/[0.04]">
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl">{s.icon}</span>
+                  <span className="text-2xl">{getIcon(s.icon)}</span>
                   <span className="text-xs font-bold text-white/20">{s.n}</span>
                 </div>
                 <h3 className="mt-4 font-semibold text-white">{s.title}</h3>
@@ -194,8 +237,8 @@ export default function LandingPage() {
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 70}>
               <div className="h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:-translate-y-1 hover:border-brand-500/40">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-500/20 to-sky-400/10 text-xl">
-                  {f.icon}
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-500/20 to-sky-400/10">
+                  {getIcon(f.icon)}
                 </div>
                 <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/50">{f.body}</p>
@@ -266,10 +309,11 @@ export default function LandingPage() {
       <section id="pricing" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Simple pricing that scales with your visibility
+            Freemium pricing that grows with you
           </h2>
           <p className="mt-3 text-white/50">
-            Start free. Upgrade when you&apos;re ready to dominate the answers.
+            Start with 2 free projects. Upgrade anytime to unlock more projects, 
+            AI monitoring, and done-for-you services.
           </p>
         </Reveal>
         <div className="mt-12">

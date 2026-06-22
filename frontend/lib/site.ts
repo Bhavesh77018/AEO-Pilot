@@ -10,7 +10,7 @@ export const SITE = {
     "score, and grow your brand's visibility inside ChatGPT, Gemini, Claude, " +
     "Perplexity, Copilot, Grok and DeepSeek — with an autonomous agent fleet.",
   url: SITE_URL,
-  logo: `${SITE_URL}/icon.svg`,
+  logo: `${SITE_URL}/logo.svg`,
   email: "hello@aeopilot.example",
   sameAs: [
     "https://github.com/Bhavesh77018/AEO-Pilot",

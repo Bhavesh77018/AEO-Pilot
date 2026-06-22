@@ -29,7 +29,7 @@ export const PLANS: Plan[] = [
     cta: "Start free",
     ctaHref: "/app",
     limits: {
-      projects: "1 project",
+      projects: "2 projects",
       scans: "5 scans / month",
       prompts: "50 tracked prompts",
       engines: "4 answer engines",

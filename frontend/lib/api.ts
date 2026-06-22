@@ -1,12 +1,8 @@
+import { apiBase } from "./apiBase";
 import type { Project, ScanDetail, ScanSummary } from "./types";
 
-// Browser uses NEXT_PUBLIC_API_URL (localhost). Server components inside the
-// container would use BACKEND_INTERNAL_URL. We only fetch from the client here.
-const API =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
-
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(`${apiBase()}${path}`, {
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
     ...init,

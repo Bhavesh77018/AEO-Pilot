@@ -97,6 +97,28 @@ Authentication → Providers → Email → disable "Confirm email".
 `DATABASE_URL`, `CORS_ORIGINS`, `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY`,
 `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `SECRET_KEY`, `APP_ENV`
 
+## HTTPS / "Not Secure" — checklist
+
+Netlify (and Vercel) serve every site over HTTPS automatically. If the browser
+shows **"Not Secure"**, it's one of these:
+
+1. **Custom domain, cert still provisioning.** Netlify → Domain management →
+   HTTPS → **Verify DNS configuration** then **Provision certificate** (Let's
+   Encrypt, free). Turn on **Force HTTPS**. New certs can take a few minutes.
+   Make sure your DNS points to Netlify (CNAME/ALIAS), not an old host.
+2. **Mixed content** — an HTTPS page loading an HTTP resource. The usual culprit
+   is `NEXT_PUBLIC_API_URL` set to `http://…`. Set it to your **https** backend
+   URL. The app now also (a) sends `Content-Security-Policy:
+   upgrade-insecure-requests` and (b) auto-upgrades an http API base to https in
+   the browser — but fix the env var so the request starts secure.
+3. **You typed `http://`.** `Strict-Transport-Security` (HSTS) is now sent, so
+   browsers will stick to https after the first secure visit.
+
+Verify headers after deploy:
+```bash
+curl -sI https://<your-site> | grep -iE "strict-transport|content-security|x-frame"
+```
+
 ## Smoke test after deploy
 
 ```bash

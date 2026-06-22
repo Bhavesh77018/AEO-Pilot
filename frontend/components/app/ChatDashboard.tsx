@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
+import { logUserQuery } from "@/lib/supabase/insights";
 import {
   SendIcon,
   ProjectsIcon,
@@ -114,6 +115,12 @@ export function ChatDashboard({
 
     setMessages((prev) => [...prev, userMessage]);
     const currentInput = input.trim().toLowerCase();
+    // Capture the query (best-effort) so we can improve the product over time.
+    void logUserQuery({
+      message: input.trim(),
+      kind: "chat",
+      context: { route: "/app", projectCount: projects.length },
+    });
     setInput("");
     setIsTyping(true);
 

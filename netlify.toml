@@ -1,0 +1,33 @@
+# Netlify config for the AEO Pilot frontend (Next.js lives in /frontend).
+[build]
+  base = "frontend"
+  command = "next build"
+  publish = ".next"
+
+# Official Next.js runtime — handles SSR, middleware (Supabase auth), and ISR.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Security headers (mirrors frontend/vercel.json).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+
+# Set these in Netlify UI → Site settings → Environment variables
+# (Production + Deploy previews):
+#   NEXT_PUBLIC_API_URL            = https://<your-backend>.onrender.com
+#   NEXT_PUBLIC_SITE_URL           = https://<your-site>.netlify.app
+#   NEXT_PUBLIC_SUPABASE_URL       = https://<ref>.supabase.co
+#   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = sb_publishable_...

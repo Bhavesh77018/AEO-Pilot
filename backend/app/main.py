@@ -22,11 +22,17 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# Hide interactive docs + OpenAPI schema from normal users in production.
+_is_prod = settings.app_env.lower() in ("production", "prod")
+
 app = FastAPI(
     title="AEO Pilot API",
     version="0.1.0",
     description="Make your startup discoverable by AI. Answer Engine Optimization platform.",
     lifespan=lifespan,
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
 )
 
 app.add_middleware(

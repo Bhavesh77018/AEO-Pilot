@@ -25,7 +25,6 @@ const COLS = [
     links: [
       { label: "Use cases", href: "/use-cases" },
       { label: "FAQ", href: "/faq" },
-      { label: "API docs", href: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/docs` },
       { label: "Contact sales", href: "mailto:sales@aeopilot.example" },
     ],
   },

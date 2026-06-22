@@ -14,10 +14,18 @@ npm-debug.log*
 yarn-error.log*
 *.tsbuildinfo
 
-# Env / secrets
+# Env / secrets — ignore ALL .env variants, keep only the templates
 .env
-.env.local
+.env.*
+!.env.example
 *.local
+*.pem
+*.key
+secrets.*
+
+# Deploy tooling
+.netlify/
+.vercel/
 
 # Editor / OS
 .vscode/

@@ -4,8 +4,8 @@ Production runs in three managed pieces that already exist in this repo:
 
 | Piece | Platform | Why |
 |---|---|---|
-| **Frontend** (Next.js) | **Vercel** | First-class Next.js hosting, edge, previews |
-| **Backend** (FastAPI) | **Render** (or Railway/Fly) | Long scans + migrations + background work don't fit Vercel serverless |
+| **Frontend** (Next.js) | **Netlify** or **Vercel** | First-class Next.js hosting, edge middleware, previews |
+| **Backend** (FastAPI) | **Render** (or Railway/Fly) | Long scans + migrations + background work don't fit serverless |
 | **Database + Auth** | **Supabase** | Postgres (pgvector) + auth — already wired |
 
 ```
@@ -50,7 +50,33 @@ Browser ──▶ Vercel (Next.js) ──NEXT_PUBLIC_API_URL──▶ Render (Fa
 
 4. Deploy. Then go back to Render and set `CORS_ORIGINS` to the final Vercel domain.
 
-## 3. Supabase auth redirect URLs
+## 2b. Frontend → Netlify (alternative to Vercel)
+
+The repo ships [`netlify.toml`](netlify.toml) with `base = "frontend"` and the
+official Next.js runtime plugin.
+
+1. Netlify → **Add new site → Import from Git** → pick this repo.
+2. Build settings are read from `netlify.toml` (base `frontend`, `next build`).
+3. **Site settings → Environment variables** — add the same four as Vercel:
+   `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+4. Deploy, then set the backend's `CORS_ORIGINS` to your `*.netlify.app` URL.
+
+## 3. Database — apply the user + queries schema
+
+In Supabase → **SQL Editor**, run [`supabase/schema.sql`](supabase/schema.sql)
+once. It creates `profiles` (your user list, auto-filled on signup),
+`user_queries` (everything users ask — to improve the product), a `waitlist`,
+RLS policies, and an `admin_user_overview` view. Make yourself admin:
+
+```sql
+update public.profiles set role = 'admin' where email = 'you@example.com';
+```
+
+> The backend's own tables (projects, scans, …) are created by Alembic; this SQL
+> only adds the **auth-scoped, RLS-protected** tables the frontend reads directly.
+
+## 4. Supabase auth redirect URLs
 
 Supabase → **Authentication → URL Configuration**:
 - **Site URL**: your Vercel domain.

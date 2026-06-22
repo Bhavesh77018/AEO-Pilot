@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark } from "@/components/Logo";
 
 const COLS = [
   {
@@ -37,9 +38,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-brand-500 to-sky-400 text-sm font-black text-white">
-                A
-              </span>
+              <LogoMark size={32} className="rounded-[8px]" />
               <span className="text-base font-semibold">AEO Pilot</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-white/40">

@@ -1,29 +1,12 @@
-<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AEO Pilot">
   <defs>
-    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    <linearGradient id="aeoFav" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#38bdf8"/>
     </linearGradient>
   </defs>
-  
-  <!-- Background -->
-  <rect width="128" height="128" fill="#0a0e27"/>
-  
-  <!-- Main icon -->
-  <g transform="translate(64, 64)">
-    <!-- Outer circle -->
-    <circle cx="0" cy="0" r="55" fill="none" stroke="url(#faviconGradient)" stroke-width="3"/>
-    
-    <!-- Orbital rings -->
-    <ellipse cx="0" cy="0" rx="35" ry="30" fill="none" stroke="url(#faviconGradient)" stroke-width="2.5" opacity="0.7"/>
-    <ellipse cx="0" cy="0" rx="25" ry="32" fill="none" stroke="url(#faviconGradient)" stroke-width="2" opacity="0.5" transform="rotate(45)"/>
-    
-    <!-- Center nucleus -->
-    <circle cx="0" cy="0" r="8" fill="url(#faviconGradient)"/>
-    
-    <!-- Electron dots -->
-    <circle cx="-10" cy="-10" r="4" fill="url(#faviconGradient)" opacity="0.8"/>
-    <circle cx="10" cy="0" r="4" fill="url(#faviconGradient)" opacity="0.8"/>
-    <circle cx="0" cy="10" r="4" fill="url(#faviconGradient)" opacity="0.8"/>
-  </g>
+  <rect width="40" height="40" rx="8" fill="url(#aeoFav)"/>
+  <path d="M10.5 30 L20 11 L29.5 30" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 23.5 H25" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30.5 5 Q30.5 8.7 34.2 8.7 Q30.5 8.7 30.5 12.4 Q30.5 8.7 26.8 8.7 Q30.5 8.7 30.5 5 Z" fill="#fff"/>
 </svg>

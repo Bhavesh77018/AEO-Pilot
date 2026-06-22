@@ -7,7 +7,7 @@ import { ChatDashboard } from "@/components/app/ChatDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import Link from "next/link";
-import Image from "next/image";
+import { LogoMark } from "@/components/Logo";
 import {
   PlusIcon,
   ProjectsIcon,
@@ -59,14 +59,7 @@ export default function AppPage() {
             onClick={() => setExpandedSidebar(!expandedSidebar)}
             className="w-full flex items-center gap-3 hover:bg-white/5 p-2 rounded-lg transition"
           >
-            <div className="h-8 w-8 flex-shrink-0 relative">
-              <Image
-                src="/logo.svg"
-                alt="AEO Pilot"
-                fill
-                className="object-contain"
-              />
-            </div>
+            <LogoMark size={32} className="flex-shrink-0 rounded-[8px]" />
             {expandedSidebar && (
               <div className="text-left">
                 <div className="text-sm font-semibold text-white">AEO Pilot</div>

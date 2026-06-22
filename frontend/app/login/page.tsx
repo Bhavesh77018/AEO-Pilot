@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthForm } from "@/components/auth/AuthForm";
+import { LogoMark } from "@/components/Logo";
 
 export default function LoginPage({
   searchParams,
@@ -17,9 +18,7 @@ export default function LoginPage({
 
       <div className="w-full max-w-sm">
         <Link href="/" className="mb-8 flex items-center justify-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand-500 to-sky-400 text-base font-black text-white shadow-lg shadow-brand-600/30">
-            A
-          </span>
+          <LogoMark size={36} className="rounded-[9px] shadow-lg shadow-brand-600/30" />
           <span className="text-lg font-semibold tracking-tight">AEO Pilot</span>
         </Link>
 

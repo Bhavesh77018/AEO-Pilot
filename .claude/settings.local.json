@@ -39,7 +39,8 @@
       "Bash(curl -s -m 10 http://127.0.0.1:8000/api/v1/billing/config)",
       "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" -X POST http://127.0.0.1:8000/api/v1/billing/order -H \"Content-Type: application/json\" -d '{\"plan\":\"growth\",\"period\":\"monthly\"}')",
       "Bash(tail -40 /tmp/aeo-frontend.log)",
-      "Bash(curl -s http://localhost:3000/ -o /tmp/home.html -w 'status=%{http_code} bytes=%{size_download}\\\\n')"
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home.html -w 'status=%{http_code} bytes=%{size_download}\\\\n')",
+      "Bash(powershell.exe -Command 'foreach \\($p in 3000,3001,3002,58060\\) { Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue } }')"
     ]
   }
 }

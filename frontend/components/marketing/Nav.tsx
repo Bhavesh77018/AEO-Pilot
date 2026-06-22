@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/Logo";
 
 const LINKS = [
   { href: "/#how", label: "How it works" },
@@ -32,9 +33,7 @@ export function Nav() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-brand-500 to-sky-400 text-sm font-black text-white shadow-lg shadow-brand-600/30">
-            A
-          </span>
+          <LogoMark size={32} className="rounded-[8px] shadow-lg shadow-brand-600/30" />
           <span className="text-base font-semibold tracking-tight">AEO Pilot</span>
         </Link>
 

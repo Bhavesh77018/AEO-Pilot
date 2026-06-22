@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { LogoMark } from "@/components/Logo";
 
 export default function NotFound() {
   return (
     <div className="grid min-h-screen place-items-center px-6 text-center">
       <div className="max-w-md">
+        <LogoMark size={44} className="mx-auto mb-4 rounded-xl" />
         <div className="text-6xl font-black text-white/10">404</div>
         <h1 className="mt-2 text-2xl font-bold text-white">Page not found</h1>
         <p className="mt-2 text-sm text-white/50">

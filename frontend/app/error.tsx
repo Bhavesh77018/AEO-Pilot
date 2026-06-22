@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { LogoMark } from "@/components/Logo";
 
 /** Next.js route error boundary — catches render/runtime errors in the tree. */
 export default function Error({
@@ -18,9 +19,7 @@ export default function Error({
   return (
     <div className="grid min-h-screen place-items-center px-6 text-center">
       <div className="max-w-md">
-        <div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-sky-400 text-lg font-black text-white">
-          A
-        </div>
+        <LogoMark size={48} className="mx-auto mb-5 rounded-xl" />
         <h1 className="text-2xl font-bold text-white">Something went wrong</h1>
         <p className="mt-2 text-sm text-white/50">
           An unexpected error occurred. Try again, or head back home.

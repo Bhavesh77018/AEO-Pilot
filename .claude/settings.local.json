@@ -49,7 +49,10 @@
       "Bash(curl -s https://aeopilot.in/robots.txt)",
       "Bash(curl -s https://aeopilot.in/sitemap.xml)",
       "Bash(curl -s https://aeopilot.in/)",
-      "Bash(curl -sI https://www.aeopilot.in/)"
+      "Bash(curl -sI https://www.aeopilot.in/)",
+      "Bash(curl -sI https://aeopilot.in/app)",
+      "Bash(curl -s -o /dev/null -w \"  /login = %{http_code}\\\\n\" https://aeopilot.in/login)",
+      "Bash(curl -s -o /dev/null -w \"  /llms.txt = %{http_code}\\\\n\" https://aeopilot.in/llms.txt)"
     ]
   }
 }

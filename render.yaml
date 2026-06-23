@@ -7,12 +7,15 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    # FREE plan — $0. Caveat: the service sleeps after ~15 min idle, so the
+    # first request after a nap cold-starts (~50s). Fine for launch; bump to
+    # "starter" ($7/mo) later to remove the cold start.
+    plan: free
     healthCheckPath: /health
-    # Render injects $PORT; bind to it instead of the dev default 8000.
-    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    # Apply DB migrations before each deploy goes live.
-    preDeployCommand: alembic upgrade head
+    # Render injects $PORT. Run migrations then start the server (free plan has
+    # no preDeployCommand, so we fold it into the start command — alembic
+    # upgrade is idempotent, so it's a no-op once the DB is up to date).
+    dockerCommand: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     autoDeploy: true
     envVars:
       - key: APP_ENV

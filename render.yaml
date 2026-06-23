@@ -12,10 +12,12 @@ services:
     # "starter" ($7/mo) later to remove the cold start.
     plan: free
     healthCheckPath: /health
-    # Render injects $PORT. Run migrations then start the server (free plan has
-    # no preDeployCommand, so we fold it into the start command — alembic
-    # upgrade is idempotent, so it's a no-op once the DB is up to date).
-    dockerCommand: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    # Plain start command — Render injects $PORT and expands it here. The app's
+    # lifespan creates any missing tables on boot, and the schema migrations are
+    # already applied to Supabase, so no alembic step is needed at startup.
+    # (Render does NOT run dockerCommand through a shell, so `&&`/`sh -c` fail —
+    # keep this a single exec-style command.)
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
       - key: APP_ENV

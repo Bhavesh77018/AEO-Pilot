@@ -1,6 +1,10 @@
-/** Canonical site metadata, used by SEO/AEO surfaces (schema, sitemap, robots). */
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+/** Canonical site metadata, used by SEO/AEO surfaces (schema, sitemap, robots).
+ *  Defaults to the production domain so canonical/sitemap/robots are correct
+ *  even if NEXT_PUBLIC_SITE_URL isn't set on the host. Override per-env as needed. */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NODE_ENV === "production" ? "https://aeopilot.in" : "http://localhost:3000")
+).replace(/\/$/, "");
 
 export const SITE = {
   name: "AEO Pilot",

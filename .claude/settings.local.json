@@ -44,7 +44,12 @@
       "Bash(npm run *)",
       "Bash(./.venv/Scripts/python.exe -m pip install \"setuptools>=70\")",
       "Bash(./.venv/Scripts/python.exe -m pip install \"setuptools<81\")",
-      "Bash(./.venv/Scripts/python.exe -c \"import pkg_resources; print\\('pkg_resources OK'\\)\")"
+      "Bash(./.venv/Scripts/python.exe -c \"import pkg_resources; print\\('pkg_resources OK'\\)\")",
+      "Bash(curl -sI https://aeopilot.in/)",
+      "Bash(curl -s https://aeopilot.in/robots.txt)",
+      "Bash(curl -s https://aeopilot.in/sitemap.xml)",
+      "Bash(curl -s https://aeopilot.in/)",
+      "Bash(curl -sI https://www.aeopilot.in/)"
     ]
   }
 }

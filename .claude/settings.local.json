@@ -41,7 +41,10 @@
       "Bash(tail -40 /tmp/aeo-frontend.log)",
       "Bash(curl -s http://localhost:3000/ -o /tmp/home.html -w 'status=%{http_code} bytes=%{size_download}\\\\n')",
       "Bash(powershell.exe -Command 'foreach \\($p in 3000,3001,3002,58060\\) { Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue } }')",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(./.venv/Scripts/python.exe -m pip install \"setuptools>=70\")",
+      "Bash(./.venv/Scripts/python.exe -m pip install \"setuptools<81\")",
+      "Bash(./.venv/Scripts/python.exe -c \"import pkg_resources; print\\('pkg_resources OK'\\)\")"
     ]
   }
 }

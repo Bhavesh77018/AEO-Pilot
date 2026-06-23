@@ -54,6 +54,11 @@ export const metadata: Metadata = {
     title: TITLE,
     description: SITE.tagline,
   },
+  // Paste the token from Google Search Console into NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+  // to verify the domain (renders the <meta name="google-site-verification">).
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   category: "technology",
 };
 

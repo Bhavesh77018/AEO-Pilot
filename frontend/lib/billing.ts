@@ -29,10 +29,12 @@ export async function createOrder(input: {
   period: string;
   email?: string | null;
 }): Promise<OrderOut> {
+  // Generous timeout — the free-tier backend can cold-start (~50s).
   const r = await fetch(`${API}/api/v1/billing/order`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+    signal: AbortSignal.timeout(75000),
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Order failed");
   return r.json();
@@ -48,6 +50,7 @@ export async function verifyPayment(input: {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+    signal: AbortSignal.timeout(30000),
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Verification failed");
   return r.json();

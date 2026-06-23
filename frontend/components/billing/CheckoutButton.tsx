@@ -13,9 +13,11 @@ type Props = {
   enabled: boolean; // billing configured?
 };
 
+type Stage = "idle" | "checking" | "starting" | "paying" | "verifying" | "success" | "error";
+
 export function CheckoutButton({ plan, period, enabled }: Props) {
   const router = useRouter();
-  const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
 
   const cls = plan.highlight
@@ -34,21 +36,56 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
     );
   }
 
+  function fail(msg: string) {
+    setError(msg);
+    setStage("error");
+  }
+
   async function checkout() {
-    setState("loading");
     setError(null);
-    try {
-      // Prefill email from the signed-in Supabase user, if any.
-      let email: string | undefined;
-      if (isSupabaseConfigured) {
+    setStage("checking");
+
+    // ── Stage 1: require login BEFORE any payment ─────────────────────
+    let userId: string | undefined;
+    let email: string | undefined;
+    if (isSupabaseConfigured) {
+      try {
         const { data } = await createClient().auth.getUser();
+        userId = data.user?.id;
         email = data.user?.email ?? undefined;
+      } catch {
+        /* treat as logged out */
       }
+      if (!userId) {
+        // Send them to sign in first, then back to pricing to complete checkout.
+        router.push(`/login?next=${encodeURIComponent("/#pricing")}`);
+        return;
+      }
+    }
 
-      const order = await createOrder({ plan: plan.id, period, email });
-      const ok = await loadRazorpay();
-      if (!ok) throw new Error("Could not load Razorpay checkout.");
+    // ── Stage 2: create the order (backend may be cold-starting) ──────
+    setStage("starting");
+    let order;
+    try {
+      order = await createOrder({ plan: plan.id, period, email });
+    } catch (e) {
+      return fail(orderError(e));
+    }
 
+    // ── Stage 3: load the secure checkout script ──────────────────────
+    let scriptOk = false;
+    try {
+      scriptOk = await loadRazorpay();
+    } catch {
+      scriptOk = false;
+    }
+    if (!scriptOk) {
+      return fail("Couldn't load the secure checkout. Disable any ad-blocker and try again.");
+    }
+
+    // ── Stage 4: open Razorpay & handle the outcome ───────────────────
+    setStage("paying");
+    try {
       const rzp = new (window as any).Razorpay({
         key: order.key_id,
         amount: order.amount,
@@ -58,48 +95,86 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
         order_id: order.order_id,
         prefill: email ? { email } : undefined,
         theme: { color: "#6366f1" },
-        modal: { ondismiss: () => setState("idle") },
+        // User closed the modal without paying — not an error.
+        modal: { ondismiss: () => setStage("idle") },
         handler: async (resp: any) => {
+          // ── Stage 5: verify the signature server-side ───────────────
+          setStage("verifying");
           try {
             await verifyPayment({
-              subscription_id: order.subscription_id,
+              subscription_id: order!.subscription_id,
               razorpay_order_id: resp.razorpay_order_id,
               razorpay_payment_id: resp.razorpay_payment_id,
               razorpay_signature: resp.razorpay_signature,
             });
-            setState("success");
-            setTimeout(() => router.push("/app"), 1600);
-          } catch (e) {
-            setError((e as Error).message);
-            setState("error");
+            setStage("success");
+            setTimeout(() => {
+              router.push("/app");
+              router.refresh();
+            }, 1600);
+          } catch {
+            // Payment likely went through but we couldn't confirm it — reassure.
+            fail(
+              `Payment received, but we couldn't confirm it automatically. ` +
+                `Save your payment id (${resp.razorpay_payment_id}) and email ` +
+                `support@aeopilot.in — you won't be charged again.`,
+            );
           }
         },
       });
       rzp.on("payment.failed", (r: any) => {
-        setError(r?.error?.description || "Payment failed");
-        setState("error");
+        fail(r?.error?.description || "Payment failed — no money was deducted. Please try again.");
       });
       rzp.open();
-    } catch (e) {
-      setError((e as Error).message);
-      setState("error");
+    } catch {
+      fail("Couldn't open the payment window. Please try again.");
     }
   }
+
+  const label =
+    stage === "checking"
+      ? "Checking…"
+      : stage === "starting"
+        ? "Starting checkout…"
+        : stage === "paying"
+          ? "Opening payment…"
+          : stage === "verifying"
+            ? "Confirming payment…"
+            : stage === "success"
+              ? "✓ Subscribed — redirecting…"
+              : stage === "error"
+                ? "Try again"
+                : plan.cta;
+
+  const busy = stage !== "idle" && stage !== "error";
 
   return (
     <div className="mt-5">
       <button
         onClick={checkout}
-        disabled={state === "loading" || state === "success"}
+        disabled={busy}
         className={`block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition disabled:opacity-70 ${cls}`}
       >
-        {state === "loading"
-          ? "Opening checkout…"
-          : state === "success"
-            ? "✓ Subscribed — redirecting…"
-            : plan.cta}
+        {label}
       </button>
-      {error && <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>}
+      {stage === "starting" && (
+        <p className="mt-2 text-center text-[11px] text-white/40">
+          Waking the server — this can take a few seconds…
+        </p>
+      )}
+      {error && <p className="mt-2 text-center text-[11px] leading-relaxed text-red-400">{error}</p>}
     </div>
   );
+}
+
+/** Map an order-creation failure to a clear, friendly message. */
+function orderError(e: unknown): string {
+  const msg = (e as Error)?.message || "";
+  if (/not configured|503/i.test(msg)) {
+    return "Payments are temporarily unavailable. Please try again shortly.";
+  }
+  if (/abort|timeout|timed out|signal/i.test(msg)) {
+    return "The server is waking up. Please tap again in a few seconds.";
+  }
+  return "Couldn't start checkout — check your connection and try again.";
 }

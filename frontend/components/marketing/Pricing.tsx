@@ -9,12 +9,17 @@ import { Reveal } from "./Reveal";
 
 export function Pricing() {
   const [annual, setAnnual] = useState(false);
-  const [billingEnabled, setBillingEnabled] = useState(false);
+  // Optimistic: show checkout buttons by default; only fall back to links if the
+  // backend explicitly says billing is off. A cold-starting backend then doesn't
+  // hide checkout — the checkout flow itself handles any failure gracefully.
+  const [billingEnabled, setBillingEnabled] = useState(true);
 
   useEffect(() => {
     getBillingConfig()
       .then((c) => setBillingEnabled(c.enabled))
-      .catch(() => setBillingEnabled(false));
+      .catch(() => {
+        /* keep optimistic — the checkout flow surfaces real errors */
+      });
   }, []);
 
   return (

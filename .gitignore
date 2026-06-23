@@ -27,6 +27,9 @@ secrets.*
 .netlify/
 .vercel/
 
+# Claude Code — local, per-user settings (not for the shared repo)
+.claude/settings.local.json
+
 # Editor / OS
 .vscode/
 .idea/

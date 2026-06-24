@@ -8,11 +8,12 @@ export const SITE_URL = (
 
 export const SITE = {
   name: "AEO Pilot",
-  tagline: "Make your startup discoverable by AI.",
+  tagline: "SEO + AEO + GEO — get found everywhere.",
   description:
-    "AEO Pilot is the growth platform for Answer Engine Optimization. Audit, " +
-    "score, and grow your brand's visibility inside ChatGPT, Gemini, Claude, " +
-    "Perplexity, Copilot, Grok and DeepSeek — with an autonomous agent fleet.",
+    "AEO Pilot is the all-in-one Search Visibility platform for SEO, AEO and " +
+    "GEO. Audit and grow your brand across Google search, AI answer engines, " +
+    "and generative AI (ChatGPT, Gemini, Claude, Perplexity) — one score, one " +
+    "place.",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
   email: "hello@aeopilot.example",

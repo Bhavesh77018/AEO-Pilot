@@ -177,18 +177,20 @@ export default function LandingPage() {
             What is AEO Pilot?
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-white/70">
-            <strong className="text-white">AEO Pilot</strong> is an Answer Engine
-            Optimization platform that audits your website, scores its AI-readiness
-            across 8 categories, and monitors whether ChatGPT, Gemini, Claude and
-            Perplexity actually mention, rank, and cite your brand. It then
-            generates the fixes — structured data, FAQs, an entity graph, and a
-            knowledge hub — that get you into AI-generated answers.
+            <strong className="text-white">AEO Pilot</strong> is the all-in-one
+            platform for <strong className="text-white">SEO, AEO and GEO</strong>.
+            It audits your website and gives you one Search Visibility Score across
+            three pillars — <span className="text-sky-300">SEO</span> (rank in
+            Google &amp; Bing), <span className="text-brand-300">AEO</span> (be the
+            answer in AI engines), and <span className="text-emerald-300">GEO</span>
+            {" "}(get cited by ChatGPT, Gemini, Claude &amp; Perplexity) — then
+            generates the fixes that lift all three.
           </p>
           <p className="mt-4 text-sm leading-relaxed text-white/45">
-            Where SEO optimizes for Google&apos;s ten blue links, AEO optimizes
-            for the single answer an AI assistant gives. As buyers shift from
-            searching to asking, the brands cited in those answers win the
-            consideration — and AEO Pilot is how you become one of them.
+            Search is splitting into three: the blue links, the direct answer, and
+            the generative reply. Most tools cover one. AEO Pilot is the single
+            place to measure and grow your visibility across all of them — one
+            score, one workflow, one platform.
           </p>
         </Reveal>
       </section>

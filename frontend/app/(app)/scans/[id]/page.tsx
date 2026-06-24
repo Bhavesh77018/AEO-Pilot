@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { CategoryRadar } from "@/components/CategoryRadar";
+import { PillarCards } from "@/components/PillarCards";
 import { Recommendations } from "@/components/Recommendations";
 import { ScoreRing } from "@/components/ScoreRing";
 import { ServiceOffer } from "@/components/ServiceOffer";
 import { VisibilityPanel } from "@/components/VisibilityPanel";
 import { api } from "@/lib/api";
+import type { PillarScore } from "@/lib/types";
 
 export default function ScanPage() {
   const { id } = useParams<{ id: string }>();
@@ -62,53 +64,38 @@ export default function ScanPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="card flex flex-col items-center justify-center gap-2 p-6">
               <ScoreRing score={data.overall_score ?? 0} />
-              <div className="text-xs text-white/40">
-                {data.pages_crawled} pages crawled
+              <div className="text-center">
+                <div className="text-xs font-medium text-white/60">Search Visibility</div>
+                <div className="text-[11px] text-white/35">{data.pages_crawled} pages crawled</div>
               </div>
             </div>
             <div className="card p-6 lg:col-span-2">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/50">
-                AI Visibility by Engine
+                AI Visibility by Engine <span className="text-white/30">· GEO</span>
               </h3>
               {data.visibility && <VisibilityPanel visibility={data.visibility} />}
             </div>
           </div>
 
-          {/* Middle: categories */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="card p-6">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-white/50">
-                AEO Category Scores
-              </h3>
-              {data.category_scores && (
-                <CategoryRadar categories={data.category_scores} />
-              )}
-            </div>
-            <div className="card p-6">
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/50">
-                Category breakdown
-              </h3>
-              <div className="space-y-3">
-                {data.category_scores &&
-                  Object.entries(data.category_scores).map(([key, c]) => (
-                    <div key={key}>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-white/80">{c.label}</span>
-                        <span className="font-semibold tabular-nums">
-                          {Math.round(c.score)}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
-                        <div
-                          className="h-full rounded-full bg-brand-500"
-                          style={{ width: `${c.score}%` }}
-                        />
-                      </div>
-                      <p className="mt-1 text-[11px] text-white/35">{c.summary}</p>
-                    </div>
-                  ))}
-              </div>
-            </div>
+          {/* Pillars: SEO · AEO · GEO */}
+          <div>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-white/50">
+              Search Visibility — SEO · AEO · GEO
+            </h3>
+            {data.category_scores && (
+              <PillarCards
+                categories={data.category_scores}
+                pillars={(data.signals?.pillars as Record<string, PillarScore>) ?? null}
+              />
+            )}
+          </div>
+
+          {/* Category radar (all 9) */}
+          <div className="card p-6">
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-white/50">
+              Category radar
+            </h3>
+            {data.category_scores && <CategoryRadar categories={data.category_scores} />}
           </div>
 
           {/* Recommendations */}

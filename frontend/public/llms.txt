@@ -1,19 +1,20 @@
 # AEO Pilot
 
-> AEO Pilot is the growth platform for Answer Engine Optimization (AEO). It helps
-> startups, SaaS companies, agencies and brands become discoverable, mentioned,
-> ranked, and cited inside AI answer engines — ChatGPT, GPT Search, Gemini,
-> Claude, Perplexity, Copilot, Grok and DeepSeek — rather than only ranking on
-> Google's blue links.
+> AEO Pilot is the all-in-one platform for SEO, AEO and GEO. It gives brands one
+> Search Visibility Score across three pillars: SEO (ranking in Google & Bing),
+> AEO (being the answer in AI answer engines & snippets), and GEO (getting cited
+> by generative AI — ChatGPT, GPT Search, Gemini, Claude, Perplexity, Copilot,
+> Grok, DeepSeek). It audits a site and generates the fixes that lift all three.
 
 ## What AEO Pilot does (the logic of use)
 
 1. You enter a domain.
 2. AEO Pilot crawls the site and extracts on-page signals (schema, FAQ, headings,
    metadata, internal links, knowledge pages).
-3. It computes an AEO score across 8 categories: Technical AEO, Entity Strength,
-   Topical Authority, Schema Coverage, Answerability, AI Readability, Citation
-   Readiness, and Knowledge Coverage (0–100 each, weighted into an overall score).
+3. It computes one Search Visibility Score across 3 pillars (SEO, AEO, GEO) and 9
+   categories: Technical SEO, On-Page SEO, Content & Structure (SEO); Schema
+   Coverage, Answerability, Entity Strength (AEO); AI Readability, Knowledge
+   Coverage, Citation Readiness (GEO) — 0–100 each, weighted into the overall.
 4. The AI Monitoring Agent prompts each answer engine with real buyer questions and
    measures whether the brand is mentioned, at what rank, and whether it is cited —
    producing measured per-engine visibility and Share of AI Voice.

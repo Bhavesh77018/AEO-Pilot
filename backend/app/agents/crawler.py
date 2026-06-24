@@ -37,6 +37,13 @@ class Page:
     has_faq: bool = False
     internal_links: list[str] = field(default_factory=list)
     text: str = ""
+    # SEO signals
+    https: bool = False
+    canonical: bool = False
+    has_viewport: bool = False
+    has_og: bool = False
+    image_count: int = 0
+    images_with_alt: int = 0
 
 
 @dataclass
@@ -45,6 +52,7 @@ class CrawlResult:
     pages: list[Page] = field(default_factory=list)
     robots_txt: bool = False
     sitemap_xml: bool = False
+    llms_txt: bool = False
 
 
 def _normalize_base(domain: str) -> str:
@@ -96,6 +104,14 @@ def _parse(url: str, html: str) -> Page:
         h.endswith("?") for h in headings
     )
 
+    # SEO signals
+    canonical = bool(soup.find("link", attrs={"rel": "canonical"}))
+    has_viewport = bool(soup.find("meta", attrs={"name": "viewport"}))
+    has_og = bool(soup.find("meta", attrs={"property": "og:title"}))
+    imgs = soup.find_all("img")
+    image_count = len(imgs)
+    images_with_alt = sum(1 for img in imgs if (img.get("alt") or "").strip())
+
     links: list[str] = []
     for a in soup.find_all("a", href=True):
         href = urljoin(url, a["href"])
@@ -108,6 +124,9 @@ def _parse(url: str, html: str) -> Page:
         schema_types=schema_types, has_faq=has_faq,
         internal_links=list(dict.fromkeys(links)),  # dedupe, keep order
         text=text[:20000],
+        https=url.lower().startswith("https://"),
+        canonical=canonical, has_viewport=has_viewport, has_og=has_og,
+        image_count=image_count, images_with_alt=images_with_alt,
     )
 
 
@@ -122,8 +141,12 @@ def crawl(domain: str, max_pages: int | None = None) -> CrawlResult:
     with httpx.Client(
         headers=headers, timeout=timeout, follow_redirects=True
     ) as client:
-        # robots.txt / sitemap presence (cheap technical-AEO signals)
-        for probe, attr in (("/robots.txt", "robots_txt"), ("/sitemap.xml", "sitemap_xml")):
+        # robots.txt / sitemap / llms.txt presence (cheap technical signals)
+        for probe, attr in (
+            ("/robots.txt", "robots_txt"),
+            ("/sitemap.xml", "sitemap_xml"),
+            ("/llms.txt", "llms_txt"),
+        ):
             try:
                 r = client.get(base + probe)
                 setattr(result, attr, r.status_code == 200)

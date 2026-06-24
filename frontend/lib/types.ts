@@ -17,10 +17,20 @@ export interface Recommendation {
   source: "heuristic" | "llm";
 }
 
+export type Pillar = "seo" | "aeo" | "geo";
+
 export interface CategoryScore {
   score: number;
   label: string;
   summary: string;
+  weight: number;
+  pillar?: Pillar;
+}
+
+export interface PillarScore {
+  label: string;
+  tagline: string;
+  score: number;
   weight: number;
 }
 

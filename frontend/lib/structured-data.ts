@@ -19,6 +19,7 @@ export function organizationSchema() {
     slogan: SITE.tagline,
     foundingDate: "2026",
     knowsAbout: [
+      "Search Engine Optimization",
       "Answer Engine Optimization",
       "Generative Engine Optimization",
       "AI Search visibility",

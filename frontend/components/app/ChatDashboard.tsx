@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { logUserQuery } from "@/lib/supabase/insights";
-import {
-  SendIcon,
-  ProjectsIcon,
-} from "@/components/Icons";
+import { LogoMark } from "@/components/Logo";
+import { SendIcon } from "@/components/Icons";
+
+function scoreColor(s: number) {
+  if (s >= 75) return "text-emerald-400";
+  if (s >= 50) return "text-amber-400";
+  return "text-red-400";
+}
 
 interface ChatMessage {
   id: string;
@@ -257,7 +261,9 @@ You're currently on the **Free** plan. Upgrade anytime!`,
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "assistant" ? (
-              <div className="max-w-2xl space-y-3">
+              <div className="flex max-w-2xl gap-3">
+                <LogoMark size={28} className="mt-1 shrink-0 rounded-lg" />
+                <div className="min-w-0 flex-1 space-y-3">
                 {msg.type === "project" && msg.project ? (
                   // Project card message
                   <button
@@ -274,7 +280,7 @@ You're currently on the **Free** plan. Upgrade anytime!`,
                         </p>
                       </div>
                       {msg.project.latest_score !== null && (
-                        <div className="text-2xl font-black text-emerald-400 tabular-nums">
+                        <div className={`text-2xl font-black tabular-nums ${scoreColor(msg.project.latest_score)}`}>
                           {Math.round(msg.project.latest_score)}
                         </div>
                       )}
@@ -313,6 +319,7 @@ You're currently on the **Free** plan. Upgrade anytime!`,
                     </p>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               // User message

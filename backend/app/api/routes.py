@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..agents.ai_monitor import run_monitoring
 from ..agents.orchestrator import run_scan
+from ..auth import get_current_user
 from ..config import settings
 from ..db import SessionLocal, get_db
 from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan, Subscription
@@ -37,7 +38,13 @@ router = APIRouter(prefix="/api/v1")
 
 # ── Projects ──────────────────────────────────────────────────────────
 @router.post("/projects", response_model=ProjectOut, status_code=201)
-def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
+def create_project(
+    body: ProjectCreate,
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
+    if settings.auth_enabled and not user:
+        raise HTTPException(401, "Sign in to create a project")
     raw = body.domain.strip().rstrip("/")
     host = raw.replace("https://", "").replace("http://", "").split("/")[0]
     hostname = host.split(":")[0]
@@ -50,7 +57,11 @@ def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
         domain = raw if raw.startswith(("http://", "https://")) else "http://" + raw
     else:
         domain = host
-    project = Project(name=body.name or host, domain=domain)
+    project = Project(
+        name=body.name or host, domain=domain,
+        user_id=user["id"] if user else None,
+        user_email=user["email"] if user else None,
+    )
     db.add(project)
     db.commit()
     db.refresh(project)
@@ -58,17 +69,27 @@ def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/projects", response_model=list[ProjectOut])
-def list_projects(db: Session = Depends(get_db)):
-    projects = db.scalars(select(Project).order_by(Project.created_at.desc())).all()
+def list_projects(
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
+    stmt = select(Project).order_by(Project.created_at.desc())
+    if settings.auth_enabled:
+        # No valid user → no projects (never leak other users' data).
+        if not user:
+            return []
+        stmt = stmt.where(Project.user_id == user["id"])
+    projects = db.scalars(stmt).all()
     return [_project_out(p) for p in projects]
 
 
 @router.get("/projects/{project_id}", response_model=ProjectOut)
-def get_project(project_id: str, db: Session = Depends(get_db)):
-    project = db.get(Project, project_id)
-    if not project:
-        raise HTTPException(404, "Project not found")
-    return _project_out(project)
+def get_project(
+    project_id: str,
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
+    return _project_out(_require_project(db, project_id, user))
 
 
 # ── Scans ─────────────────────────────────────────────────────────────
@@ -77,10 +98,9 @@ def start_scan(
     project_id: str,
     background: BackgroundTasks,
     db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
 ):
-    project = db.get(Project, project_id)
-    if not project:
-        raise HTTPException(404, "Project not found")
+    project = _require_project(db, project_id, user)
 
     scan = Scan(project_id=project.id, status="pending")
     db.add(scan)
@@ -103,7 +123,12 @@ def _run_scan_task(scan_id: str, domain: str) -> None:
 
 
 @router.get("/projects/{project_id}/scans", response_model=list[ScanSummary])
-def list_scans(project_id: str, db: Session = Depends(get_db)):
+def list_scans(
+    project_id: str,
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
+    _require_project(db, project_id, user)
     scans = db.scalars(
         select(Scan).where(Scan.project_id == project_id).order_by(Scan.created_at.desc())
     ).all()
@@ -111,10 +136,15 @@ def list_scans(project_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/scans/{scan_id}", response_model=ScanDetail)
-def get_scan(scan_id: str, db: Session = Depends(get_db)):
+def get_scan(
+    scan_id: str,
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
     scan = db.get(Scan, scan_id)
     if not scan:
         raise HTTPException(404, "Scan not found")
+    _check_owner(scan.project, user)
     # Attach the Done-For-You service offer (computed fresh from findings).
     if scan.status == "completed":
         scan.service_offer = service_offer.build_offer(
@@ -125,16 +155,18 @@ def get_scan(scan_id: str, db: Session = Depends(get_db)):
 
 # ── Phase 2: prompts ──────────────────────────────────────────────────
 @router.get("/projects/{project_id}/prompts", response_model=list[PromptOut])
-def list_prompts(project_id: str, db: Session = Depends(get_db)):
-    _require_project(db, project_id)
+def list_prompts(project_id: str, db: Session = Depends(get_db),
+                 user: dict | None = Depends(get_current_user)):
+    _require_project(db, project_id, user)
     return db.scalars(
         select(Prompt).where(Prompt.project_id == project_id).order_by(Prompt.created_at)
     ).all()
 
 
 @router.post("/projects/{project_id}/prompts", response_model=PromptOut, status_code=201)
-def add_prompt(project_id: str, body: PromptCreate, db: Session = Depends(get_db)):
-    _require_project(db, project_id)
+def add_prompt(project_id: str, body: PromptCreate, db: Session = Depends(get_db),
+               user: dict | None = Depends(get_current_user)):
+    _require_project(db, project_id, user)
     prompt = Prompt(project_id=project_id, text=body.text.strip(), intent=body.intent)
     db.add(prompt)
     db.commit()
@@ -143,10 +175,11 @@ def add_prompt(project_id: str, body: PromptCreate, db: Session = Depends(get_db
 
 
 @router.post("/projects/{project_id}/prompts/suggest", response_model=list[PromptOut], status_code=201)
-def suggest_prompts(project_id: str, db: Session = Depends(get_db)):
+def suggest_prompts(project_id: str, db: Session = Depends(get_db),
+                    user: dict | None = Depends(get_current_user)):
     """Generate buyer-intent prompts (LLM if a key is set, else templates) and
     persist them so the project is immediately monitorable."""
-    project = _require_project(db, project_id)
+    project = _require_project(db, project_id, user)
     context = _homepage_context(db, project)
     suggestions = prompt_suggester.suggest(project.name, project.domain, context)
     created = []
@@ -161,17 +194,20 @@ def suggest_prompts(project_id: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/prompts/{prompt_id}", status_code=204)
-def delete_prompt(prompt_id: str, db: Session = Depends(get_db)):
+def delete_prompt(prompt_id: str, db: Session = Depends(get_db),
+                  user: dict | None = Depends(get_current_user)):
     prompt = db.get(Prompt, prompt_id)
     if prompt:
+        _check_owner(prompt.project, user)
         db.delete(prompt)
         db.commit()
 
 
 # ── Phase 2: AI monitoring runs ───────────────────────────────────────
 @router.post("/projects/{project_id}/monitor", response_model=MonitoringRunSummary, status_code=202)
-def start_monitoring(project_id: str, background: BackgroundTasks, db: Session = Depends(get_db)):
-    project = _require_project(db, project_id)
+def start_monitoring(project_id: str, background: BackgroundTasks, db: Session = Depends(get_db),
+                     user: dict | None = Depends(get_current_user)):
+    project = _require_project(db, project_id, user)
 
     # Make the project monitorable out of the box: seed prompts if none exist.
     if not any(p.active for p in project.prompts):
@@ -201,8 +237,9 @@ def _run_monitoring_task(run_id: str) -> None:
 
 
 @router.get("/projects/{project_id}/monitor", response_model=list[MonitoringRunSummary])
-def list_monitoring_runs(project_id: str, db: Session = Depends(get_db)):
-    _require_project(db, project_id)
+def list_monitoring_runs(project_id: str, db: Session = Depends(get_db),
+                         user: dict | None = Depends(get_current_user)):
+    _require_project(db, project_id, user)
     return db.scalars(
         select(MonitoringRun).where(MonitoringRun.project_id == project_id)
         .order_by(MonitoringRun.created_at.desc())
@@ -210,10 +247,12 @@ def list_monitoring_runs(project_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/monitor/{run_id}", response_model=MonitoringRunDetail)
-def get_monitoring_run(run_id: str, db: Session = Depends(get_db)):
+def get_monitoring_run(run_id: str, db: Session = Depends(get_db),
+                       user: dict | None = Depends(get_current_user)):
     run = db.get(MonitoringRun, run_id)
     if not run:
         raise HTTPException(404, "Monitoring run not found")
+    _check_owner(run.project, user)
     return run
 
 
@@ -283,10 +322,19 @@ def verify_payment(body: PaymentVerify, db: Session = Depends(get_db)):
 
 
 # ── helpers ───────────────────────────────────────────────────────────
-def _require_project(db: Session, project_id: str) -> Project:
+def _check_owner(project: Project | None, user: dict | None) -> None:
+    """Enforce per-user ownership. 404 (not 403) so existence isn't revealed."""
+    if not settings.auth_enabled:
+        return
+    if not project or not user or project.user_id != user["id"]:
+        raise HTTPException(404, "Project not found")
+
+
+def _require_project(db: Session, project_id: str, user: dict | None = None) -> Project:
     project = db.get(Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
+    _check_owner(project, user)
     return project
 
 

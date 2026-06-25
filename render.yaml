@@ -25,8 +25,15 @@ services:
       # Supabase Postgres (use the IPv4 session pooler connection string).
       - key: DATABASE_URL
         sync: false
-      # Comma-separated allowed origins — set to your Vercel URL(s).
+      # Comma-separated allowed origins — set to your Vercel/Netlify URL(s).
       - key: CORS_ORIGINS
+        sync: false
+      # Supabase token verification → per-user data isolation. Public values
+      # (URL + publishable/anon key). REQUIRED for users to see only their own
+      # projects. SUPABASE_ANON_KEY = your sb_publishable_... key.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
         sync: false
       # LLM (optional but recommended for live monitoring + content).
       - key: LLM_PROVIDER

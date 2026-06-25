@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
+    # Supabase — used to VERIFY the user's access token for per-user data
+    # isolation. Both are public (the anon/publishable key is browser-safe).
+    # When set, project/scan endpoints scope data to the authenticated user.
+    supabase_url: str | None = None
+    supabase_anon_key: str | None = None
+
+    @property
+    def auth_enabled(self) -> bool:
+        return bool(self.supabase_url and self.supabase_anon_key)
+
     # Storage. Default is a local sqlite file so the API boots even with no
     # Postgres around; docker-compose overrides this with the pgvector DB.
     database_url: str = "sqlite+pysqlite:///./aeo.db"

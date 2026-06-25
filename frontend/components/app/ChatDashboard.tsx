@@ -43,8 +43,29 @@ export function ChatDashboard({
 
   const createProject = useMutation({
     mutationFn: (domain: string) => api.createProject(domain),
-    onSuccess: () => {
+    onSuccess: (project) => {
       qc.invalidateQueries({ queryKey: ["projects"] });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `created-${project.id}`,
+          role: "assistant",
+          type: "text",
+          content: `✅ Added ${project.domain}! Tap the card below to run your first Search Visibility scan — SEO + AEO + GEO.`,
+        },
+        { id: `project-${project.id}`, role: "assistant", type: "project", content: project.domain, project },
+      ]);
+    },
+    onError: (e) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          type: "text",
+          content: `❌ Couldn't add that domain — ${(e as Error).message.slice(0, 140)}`,
+        },
+      ]);
     },
   });
 
@@ -52,6 +73,17 @@ export function ChatDashboard({
     mutationFn: (projectId: string) => api.startScan(projectId),
     onSuccess: (scan) => {
       router.push(`/scans/${scan.id}`);
+    },
+    onError: (e) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          type: "text",
+          content: `❌ Couldn't start the scan — ${(e as Error).message.slice(0, 140)}`,
+        },
+      ]);
     },
   });
 
@@ -63,7 +95,7 @@ export function ChatDashboard({
           id: "welcome",
           role: "assistant",
           type: "welcome",
-          content: `👋 Hey! I'm AEO Pilot. I help you get your brand mentioned in ChatGPT, Gemini, Claude & Perplexity.\n\n${
+          content: `👋 Hey! I'm AEO Pilot. I score your site across SEO, AEO & GEO — so you rank in Google AND get cited by ChatGPT, Gemini, Claude & Perplexity.\n\n${
             !userEmail
               ? "Sign in to start analyzing your websites for AI visibility."
               : `You have ${projects.length}/2 free projects. ${
@@ -255,6 +287,15 @@ You're currently on the **Free** plan. Upgrade anytime!`,
     <div className="flex flex-col h-full">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto space-y-4 p-6">
+        {isLoading && messages.length === 0 && (
+          <div className="flex items-center gap-3">
+            <LogoMark size={28} className="rounded-lg" />
+            <div className="flex items-center gap-2 text-sm text-white/50">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-brand-400" />
+              Loading your workspace…
+            </div>
+          </div>
+        )}
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -330,20 +371,29 @@ You're currently on the **Free** plan. Upgrade anytime!`,
           </div>
         ))}
 
-        {/* Typing indicator */}
-        {isTyping && (
+        {/* Typing / working indicator */}
+        {(isTyping || createProject.isPending || startScan.isPending) && (
           <div className="flex justify-start">
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 rounded-full bg-white/40 animate-bounce" />
-                <div
-                  className="w-2 h-2 rounded-full bg-white/40 animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                />
-                <div
-                  className="w-2 h-2 rounded-full bg-white/40 animate-bounce"
-                  style={{ animationDelay: "0.4s" }}
-                />
+            <div className="flex max-w-2xl gap-3">
+              <LogoMark size={28} className="mt-1 shrink-0 rounded-lg" />
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                {createProject.isPending || startScan.isPending ? (
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/20 border-t-brand-400" />
+                    <span className="text-sm text-white/70">
+                      {startScan.isPending ? "Starting your scan…" : "Adding & analyzing your site…"}
+                    </span>
+                    <span className="hidden text-[11px] text-white/30 sm:inline">
+                      the server may take a few seconds to wake
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex gap-1.5">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-white/40" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-white/40" style={{ animationDelay: "0.15s" }} />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-white/40" style={{ animationDelay: "0.3s" }} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -367,16 +417,16 @@ You're currently on the **Free** plan. Upgrade anytime!`,
                     ? "Project limit reached. Upgrade to add more..."
                     : "Type a domain or say 'help'..."
               }
-              disabled={!userEmail || isTyping}
+              disabled={!userEmail || isTyping || createProject.isPending}
               className="flex-1 rounded-xl border border-white/10 bg-ink-900/50 px-4 py-3 text-white placeholder-white/30 focus:border-brand-500/50 focus:outline-none disabled:opacity-50 transition"
             />
             <button
               type="submit"
-              disabled={!input.trim() || isTyping || !userEmail}
+              disabled={!input.trim() || isTyping || !userEmail || createProject.isPending}
               className="rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-50 px-4 py-3 font-semibold text-white transition flex items-center justify-center gap-2"
             >
-              {isTyping ? (
-                <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+              {isTyping || createProject.isPending ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
                 <SendIcon size={18} />
               )}

@@ -3,7 +3,7 @@ import "./globals.css";
 import { SITE, SITE_URL } from "@/lib/site";
 import { Providers } from "./providers";
 
-const TITLE = "AEO Pilot — Make your startup discoverable by AI";
+const TITLE = "AEO Pilot — Rank in AI + Google · SEO · AEO · GEO";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -8,7 +8,7 @@ export const SITE_URL = (
 
 export const SITE = {
   name: "AEO Pilot",
-  tagline: "SEO + AEO + GEO — get found everywhere.",
+  tagline: "Rank in AI + Google — your brand visibility in one place.",
   description:
     "AEO Pilot is the all-in-one Search Visibility platform for SEO, AEO and " +
     "GEO. Audit and grow your brand across Google search, AI answer engines, " +

@@ -4,7 +4,6 @@ import { Faq } from "@/components/marketing/Faq";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
 import { Pricing } from "@/components/marketing/Pricing";
 import { Reveal } from "@/components/marketing/Reveal";
-import { SeoAeoAnimation } from "@/components/marketing/SeoAeoAnimation";
 import { SeoVsAeoComparison } from "@/components/marketing/SeoVsAeoComparison";
 import { ChatPilotInterface } from "@/components/marketing/ChatPilotInterface";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -17,9 +16,9 @@ import {
 } from "@/components/Icons";
 
 const STATS = [
-  { value: "8+", label: "Answer engines tracked" },
-  { value: "25", label: "Autonomous agents" },
-  { value: "8", label: "AEO score categories" },
+  { value: "3", label: "Pillars · SEO · AEO · GEO" },
+  { value: "8+", label: "AI engines tracked" },
+  { value: "9", label: "Score categories" },
   { value: "60s", label: "To your first score" },
 ];
 
@@ -32,8 +31,8 @@ const STEPS = [
   },
   {
     n: "02",
-    title: "Score across 8 categories",
-    body: "The AEO engine scores Technical AEO, Entity Strength, Schema, Answerability, AI Readability, Citation Readiness and more — 0 to 100.",
+    title: "Score 3 pillars: SEO · AEO · GEO",
+    body: "One Search Visibility Score across SEO (Google/Bing rank), AEO (be the answer), and GEO (cited by ChatGPT, Gemini, Claude, Perplexity) — 9 categories, 0 to 100.",
     icon: "monitor",
   },
   {
@@ -80,6 +79,39 @@ function getIcon(iconName: string) {
   }
 }
 
+const THREE_PILLARS = [
+  {
+    abbr: "SEO",
+    full: "Search Engine Optimization",
+    title: "Rank on Google & Bing",
+    what: "The classic blue links — technical health, on-page signals, and content structure that search engines reward.",
+    win: "You appear high in the search results.",
+    does: "Audits HTTPS, canonicals, mobile, titles/meta, headings, internal linking and content depth — with the exact fixes.",
+    accent: "from-sky-500/15 to-transparent border-sky-500/30",
+    badge: "bg-sky-500/20 text-sky-300",
+  },
+  {
+    abbr: "AEO",
+    full: "Answer Engine Optimization",
+    title: "Be the direct answer",
+    what: "Featured snippets, voice, and AI answer engines that give one answer instead of ten links.",
+    win: "You ARE the answer the engine returns.",
+    does: "Builds your entity graph + schema (Organization, FAQ, Article) and liftable Q&A so engines quote you directly.",
+    accent: "from-brand-500/15 to-transparent border-brand-500/30",
+    badge: "bg-brand-500/20 text-brand-300",
+  },
+  {
+    abbr: "GEO",
+    full: "Generative Engine Optimization",
+    title: "Get cited by generative AI",
+    what: "ChatGPT, Gemini, Claude, Perplexity and AI Overviews synthesize answers — and name their sources.",
+    win: "AI names and links your brand in its reply.",
+    does: "Tracks your mention rate & Share of AI Voice, adds llms.txt + citation-ready content, and monitors every engine.",
+    accent: "from-emerald-500/15 to-transparent border-emerald-500/30",
+    badge: "bg-emerald-500/20 text-emerald-300",
+  },
+];
+
 export default function LandingPage() {
   return (
     <>
@@ -90,23 +122,23 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="animate-fade-up">
             <Link
-              href="/#how"
+              href="/#pillars"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60 transition hover:bg-white/10"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              AI Search is the new frontier
+              SEO · AEO · GEO — one platform
             </Link>
-            
-            {/* Animated SEO → AEO transition */}
-            <div className="mt-8 mb-6">
-              <SeoAeoAnimation />
-            </div>
+
+            <h1 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+              Rank in <span className="gradient-text">AI + Google</span>.
+            </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/55">
-              SEO got you ranked on Google's blue links. AEO gets you{" "}
-              <span className="text-white/80">mentioned, ranked, and cited</span>{" "}
-              inside ChatGPT, Gemini, Claude and Perplexity — with an autonomous
-              agent fleet that audits, scores, and grows your AI visibility.
+              Your entire brand visibility, in one place. AEO Pilot measures and
+              grows you across <span className="text-white/80">SEO</span> (rank on
+              Google &amp; Bing), <span className="text-white/80">AEO</span> (be the
+              AI answer), and <span className="text-white/80">GEO</span> (get cited
+              by ChatGPT, Gemini, Claude &amp; Perplexity) — one score, one workflow.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -136,7 +168,7 @@ export default function LandingPage() {
         {/* marquee */}
         <div className="mt-16">
           <p className="mb-3 text-center text-xs uppercase tracking-wider text-white/30">
-            Optimized for every answer engine
+            Optimized for Google, Bing &amp; every AI answer engine
           </p>
           <EngineMarquee />
         </div>
@@ -152,6 +184,61 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ───────── The three pillars, explained ───────── */}
+      <section id="pillars" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            One score for the whole search era
+          </h2>
+          <p className="mt-3 text-white/50">
+            Search is splitting three ways — the blue links, the direct answer, and
+            the generative reply. Most tools cover one. AEO Pilot covers all three.
+          </p>
+        </Reveal>
+
+        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          {THREE_PILLARS.map((p, i) => (
+            <Reveal key={p.abbr} delay={i * 90}>
+              <div className={`h-full rounded-2xl border bg-gradient-to-b p-6 ${p.accent}`}>
+                <div className="flex items-center gap-2">
+                  <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${p.badge}`}>
+                    {p.abbr}
+                  </span>
+                  <span className="text-xs text-white/45">{p.full}</span>
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-white">{p.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">{p.what}</p>
+                <div className="mt-5 border-t border-white/10 pt-4">
+                  <div className="text-[10px] uppercase tracking-wider text-white/35">
+                    You win when
+                  </div>
+                  <p className="mt-1 text-sm font-medium text-white/80">{p.win}</p>
+                </div>
+                <div className="mt-3">
+                  <div className="text-[10px] uppercase tracking-wider text-white/35">
+                    AEO Pilot does
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed text-white/55">{p.does}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal className="mt-10 text-center">
+          <p className="text-sm text-white/45">
+            Three pillars → <span className="text-white/80">one Search Visibility Score</span>.
+            Enter a domain and see all three in under a minute.
+          </p>
+          <Link
+            href="/app"
+            className="mt-4 inline-flex rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-400"
+          >
+            Get your free score →
+          </Link>
+        </Reveal>
       </section>
 
       {/* ───────── SEO vs AEO Comparison ───────── */}
@@ -341,10 +428,11 @@ export default function LandingPage() {
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-800/60 p-10 text-center sm:p-16">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-600/20 via-transparent to-sky-500/10" />
             <h2 className="mx-auto max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">
-              Find out why AI doesn&apos;t mention you yet.
+              See your visibility in AI <span className="gradient-text">+</span> Google.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/55">
-              Run your first AEO scan in under a minute — no key, no card.
+              One free scan, one Search Visibility Score across SEO, AEO &amp; GEO —
+              in under a minute. No key, no card.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link

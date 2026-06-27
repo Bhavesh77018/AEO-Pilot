@@ -256,13 +256,26 @@ function AppPageInner() {
               {userEmail && (
                 <div className="truncate px-2 py-1 text-[11px] text-white/40">{userEmail}</div>
               )}
-              <Link
-                href="/login"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
-              >
-                <AccountIcon size={16} />
-                {userEmail ? "Account" : "Sign in"}
-              </Link>
+              {userEmail ? (
+                <button
+                  onClick={async () => {
+                    await createClient().auth.signOut();
+                    window.location.href = "/login";
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+                >
+                  <AccountIcon size={16} />
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+                >
+                  <AccountIcon size={16} />
+                  Sign in
+                </Link>
+              )}
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -273,13 +286,26 @@ function AppPageInner() {
               >
                 <UpgradeIcon size={18} />
               </button>
-              <Link
-                href="/login"
-                className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 text-white/50 transition hover:bg-white/10"
-                title={userEmail ?? "Sign in"}
-              >
-                <AccountIcon size={18} />
-              </Link>
+              {userEmail ? (
+                <button
+                  onClick={async () => {
+                    await createClient().auth.signOut();
+                    window.location.href = "/login";
+                  }}
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 text-white/50 transition hover:bg-white/10"
+                  title="Sign out"
+                >
+                  <AccountIcon size={18} />
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 text-white/50 transition hover:bg-white/10"
+                  title="Sign in"
+                >
+                  <AccountIcon size={18} />
+                </Link>
+              )}
             </div>
           )}
         </div>

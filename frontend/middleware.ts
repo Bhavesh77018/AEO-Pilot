@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PROTECTED = ["/scans"];
+const PROTECTED = ["/app", "/scans"];
 
 export async function middleware(request: NextRequest) {
   try {

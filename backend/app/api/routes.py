@@ -366,8 +366,6 @@ def _check_owner(project: Project | None, user: dict | None) -> None:
     if not project:
         raise HTTPException(404, "Project not found")
     if not settings.auth_enabled:
-        if settings.app_env.lower() in ("production", "prod"):
-            raise HTTPException(404, "Project not found")
         if project.user_id is not None:
             raise HTTPException(404, "Project not found")
         return

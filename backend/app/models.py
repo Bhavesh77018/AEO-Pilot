@@ -147,13 +147,25 @@ class Prompt(Base):
     __tablename__ = "prompts"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
-    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
     text: Mapped[str] = mapped_column(Text)
-    intent: Mapped[str] = mapped_column(String(32), default="custom")  # category|comparison|alternative|branded|custom
+    intent: Mapped[str] = mapped_column(String(50))
     active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     project: Mapped["Project"] = relationship(back_populates="prompts")
+
+
+class ContactSubmission(Base):
+    __tablename__ = "contact_submissions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    name: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str] = mapped_column(String(255))
+    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class MonitoringRun(Base):

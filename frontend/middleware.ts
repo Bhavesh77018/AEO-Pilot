@@ -14,10 +14,13 @@ export async function middleware(request: NextRequest) {
     const isProtected = PROTECTED.some((p) => path === p || path.startsWith(`${p}/`));
 
     if (isProtected && !user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("next", path);
-      return NextResponse.redirect(url);
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      // Preserve the FULL original URL (path + query) so the domain param survives auth
+      const fullNext = request.nextUrl.pathname + request.nextUrl.search;
+      loginUrl.search = "";
+      loginUrl.searchParams.set("next", fullNext);
+      return NextResponse.redirect(loginUrl);
     }
 
     // Already signed in? Skip the login page.

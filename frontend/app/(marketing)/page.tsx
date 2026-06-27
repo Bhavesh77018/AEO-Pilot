@@ -6,6 +6,7 @@ import { Pricing } from "@/components/marketing/Pricing";
 import { Reveal } from "@/components/marketing/Reveal";
 import { SeoVsAeoComparison } from "@/components/marketing/SeoVsAeoComparison";
 import { ChatPilotInterface } from "@/components/marketing/ChatPilotInterface";
+import { HireUsButton } from "@/components/marketing/HireUsButton";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqSchema } from "@/lib/structured-data";
 import {
@@ -25,37 +26,37 @@ const STATS = [
 const STEPS = [
   {
     n: "01",
-    title: "Crawl & understand",
-    body: "Drop in a domain. The Website Auditor crawls your pages, metadata, schema, and content to build a semantic picture of your brand.",
+    title: "Deep-crawl your brand",
+    body: "We crawl every page, schema, metadata and content signal to build a complete semantic model of your brand — the same way AI models see you.",
     icon: "scan",
   },
   {
     n: "02",
-    title: "Score 3 pillars: SEO · AEO · GEO",
-    body: "One Search Visibility Score across SEO (Google/Bing rank), AEO (be the answer), and GEO (cited by ChatGPT, Gemini, Claude, Perplexity) — 9 categories, 0 to 100.",
+    title: "Score across SEO · AEO · GEO",
+    body: "One unified Search Visibility Score across all three modern pillars — 9 categories, 0 to 100. You see exactly where you're winning and where you're invisible.",
     icon: "monitor",
   },
   {
     n: "03",
-    title: "Monitor the engines",
-    body: "The AI Monitoring Agent prompts ChatGPT, Gemini, Claude & Perplexity with real buyer questions and measures your mention rate, rank, and citations.",
+    title: "Monitor every AI engine",
+    body: "We actively prompt ChatGPT, Gemini, Claude & Perplexity with real buyer questions and track your mention rate, rank position, and citations — daily.",
     icon: "monitor",
   },
   {
     n: "04",
-    title: "Fix & grow",
-    body: "Get prioritized fixes — or let our Done-For-You team implement schema, FAQ corpora, entity graphs and citation campaigns for you.",
+    title: "Execute & dominate",
+    body: "Our expert team implements schema, FAQ corpora, entity graphs and citation campaigns — or you self-serve with our AI-generated, step-by-step fix list.",
     icon: "recommend",
   },
 ];
 
 const FEATURES = [
-  { icon: "recommend", title: "Entity graph", body: "Map your company, people, products and competitors, then auto-generate JSON-LD that engines trust." },
-  { icon: "recommend", title: "FAQ engine", body: "Generate hundreds of intent-clustered, schema-ready FAQs that become the answers LLMs cite." },
-  { icon: "compare", title: "Competitor intelligence", body: "See which rivals own the AI answers, and the exact authority gaps you can close." },
-  { icon: "recommend", title: "Knowledge hub generator", body: "Spin up /faq, /guides, /glossary and /compare pages — AI-readable and human-readable." },
-  { icon: "scan", title: "Citation builder", body: "Surface the sources, communities and pages where a mention turns into a citation." },
-  { icon: "monitor", title: "Visibility tracking", body: "Track mention frequency, ranking, and Share of AI Voice over time, per engine." },
+  { icon: "recommend", title: "Entity graph engineering", body: "Map your company, people, products and competitors into a trust graph, then auto-generate JSON-LD that every AI engine reads and trusts." },
+  { icon: "recommend", title: "FAQ & answer corpus", body: "Generate hundreds of intent-clustered, schema-ready Q&As that become the exact answers LLMs cite when buyers ask about your category." },
+  { icon: "compare", title: "Competitor intelligence", body: "Discover which rivals own the AI narrative in your category, the exact gap, and the fastest path to closing it." },
+  { icon: "recommend", title: "Knowledge hub generation", body: "We build /faq, /guides, /glossary and /compare pages — perfectly structured for both AI crawlers and human readers." },
+  { icon: "scan", title: "Citation & authority builder", body: "Surface the exact sources, communities and publications where earning a mention turns into a durable AI citation." },
+  { icon: "monitor", title: "Share of AI Voice™ tracking", body: "Track how often you're mentioned, at what rank, and with what framing — per engine, per buyer intent, over time." },
 ];
 
 const ENGINES = [
@@ -63,7 +64,62 @@ const ENGINES = [
   "Perplexity", "Copilot", "Grok", "DeepSeek",
 ];
 
-// Helper function to get icon component
+const WHY_HIRE_US = [
+  {
+    icon: "🏆",
+    title: "We built the playbook",
+    body: "AEO Pilot is the only platform purpose-built for Answer Engine & Generative Engine Optimization — not an SEO tool retrofitted for AI. We wrote the methodology from scratch.",
+  },
+  {
+    icon: "⚡",
+    title: "Speed that beats your market",
+    body: "From first scan to first fix in under 60 seconds. Your competitors are still ranking for blue links while we get your brand into the AI answer.",
+  },
+  {
+    icon: "📡",
+    title: "We track what others can't see",
+    body: "Real-time AI engine monitoring across 8+ LLMs. We actively prompt ChatGPT, Gemini, Claude and Perplexity with your buyer's exact questions — and show you who's winning.",
+  },
+  {
+    icon: "🔬",
+    title: "Proprietary scoring model",
+    body: "Our 9-category Search Visibility Score is the only unified metric that combines traditional SEO health with AI answerability and generative citation depth.",
+  },
+  {
+    icon: "🤝",
+    title: "Done-For-You execution",
+    body: "Insight is worthless without action. Our expert team implements every fix — schema, entity graphs, FAQ corpora, content and citations — with a measurable lift guarantee.",
+  },
+  {
+    icon: "📈",
+    title: "ROI you can prove",
+    body: "Buyer questions → AI answer → your brand cited → sale. We measure every step of that chain so you can present hard numbers to stakeholders.",
+  },
+];
+
+const WHY_INVEST = [
+  {
+    stat: "$1.8T",
+    label: "AI market by 2030",
+    detail: "Every dollar of that growth flows through search. Brands cited in AI answers capture consideration that blue-link brands will never see.",
+  },
+  {
+    stat: "54%",
+    label: "of buyers start with AI",
+    detail: "More than half of B2B purchase journeys now begin with an AI query — and the AI gives one answer, not ten links. Position zero is everything.",
+  },
+  {
+    stat: "3×",
+    label: "conversion lift from citations",
+    detail: "Brands explicitly cited by ChatGPT or Perplexity convert at 3× the rate of brands found via a regular search link. Trust is pre-built.",
+  },
+  {
+    stat: "Early",
+    label: "mover advantage closes fast",
+    detail: "AI citations form preference loops — the brands cited most become the brands cited first. The window to establish dominance is now.",
+  },
+];
+
 function getIcon(iconName: string) {
   switch (iconName) {
     case "scan":
@@ -84,7 +140,7 @@ const THREE_PILLARS = [
     abbr: "SEO",
     full: "Search Engine Optimization",
     title: "Rank on Google & Bing",
-    what: "The classic blue links — technical health, on-page signals, and content structure that search engines reward.",
+    what: "Technical health, on-page signals, and content structure that traditional search engines reward with top positions.",
     win: "You appear high in the search results.",
     does: "Audits HTTPS, canonicals, mobile, titles/meta, headings, internal linking and content depth — with the exact fixes.",
     accent: "from-sky-500/15 to-transparent border-sky-500/30",
@@ -94,7 +150,7 @@ const THREE_PILLARS = [
     abbr: "AEO",
     full: "Answer Engine Optimization",
     title: "Be the direct answer",
-    what: "Featured snippets, voice, and AI answer engines that give one answer instead of ten links.",
+    what: "Featured snippets, voice, and AI answer engines that return one answer instead of ten links. First or invisible.",
     win: "You ARE the answer the engine returns.",
     does: "Builds your entity graph + schema (Organization, FAQ, Article) and liftable Q&A so engines quote you directly.",
     accent: "from-brand-500/15 to-transparent border-brand-500/30",
@@ -104,7 +160,7 @@ const THREE_PILLARS = [
     abbr: "GEO",
     full: "Generative Engine Optimization",
     title: "Get cited by generative AI",
-    what: "ChatGPT, Gemini, Claude, Perplexity and AI Overviews synthesize answers — and name their sources.",
+    what: "ChatGPT, Gemini, Claude, Perplexity and AI Overviews synthesize answers and name their sources. Be that source.",
     win: "AI names and links your brand in its reply.",
     does: "Tracks your mention rate & Share of AI Voice, adds llms.txt + citation-ready content, and monitors every engine.",
     accent: "from-emerald-500/15 to-transparent border-emerald-500/30",
@@ -122,41 +178,45 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="animate-fade-up">
             <Link
-              href="/#pillars"
+              href="/#why-hire-us"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60 transition hover:bg-white/10"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              SEO · AEO · GEO — one platform
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              The AI search era is here — is your brand ready?
             </Link>
 
             <h1 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-              Rank in <span className="gradient-text">AI + Google</span>.
+              We rank your brand in{" "}
+              <span className="gradient-text">AI + Google.</span>
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/55">
-              Your entire brand visibility, in one place. AEO Pilot measures and
-              grows you across <span className="text-white/80">SEO</span> (rank on
-              Google &amp; Bing), <span className="text-white/80">AEO</span> (be the
-              AI answer), and <span className="text-white/80">GEO</span> (get cited
-              by ChatGPT, Gemini, Claude &amp; Perplexity) — one score, one workflow.
+              AEO Pilot is the{" "}
+              <span className="text-white/80">premium AI search agency</span>{" "}
+              that makes your brand the answer ChatGPT, Gemini, Claude &
+              Perplexity give — across{" "}
+              <span className="text-white/80">SEO</span>,{" "}
+              <span className="text-white/80">AEO</span> and{" "}
+              <span className="text-white/80">GEO</span> — one score, one
+              workflow, zero guesswork.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/app"
+                href="/#why-hire-us"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-6 py-3.5 text-sm font-semibold text-white shadow-xl shadow-brand-600/30 transition hover:bg-brand-400"
               >
-                Launch AEO Pilot
+                Why hire us
                 <span className="transition-transform group-hover:translate-x-0.5">→</span>
               </Link>
               <Link
-                href="/#pricing"
+                href="/#invest"
                 className="inline-flex items-center justify-center rounded-xl border border-white/15 px-6 py-3.5 text-sm font-semibold text-white/80 transition hover:bg-white/5"
               >
-                See pricing
+                Why invest in us
               </Link>
             </div>
             <p className="mt-4 text-xs text-white/35">
-              2 free projects · zero API keys needed · first score in under a minute.
+              Free visibility scan · no API keys needed · first score in under a minute.
             </p>
           </div>
 
@@ -168,7 +228,7 @@ export default function LandingPage() {
         {/* marquee */}
         <div className="mt-16">
           <p className="mb-3 text-center text-xs uppercase tracking-wider text-white/30">
-            Optimized for Google, Bing &amp; every AI answer engine
+            We rank you on Google, Bing & every AI answer engine
           </p>
           <EngineMarquee />
         </div>
@@ -186,15 +246,44 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ───────── The three pillars, explained ───────── */}
+      {/* ───────── Vision ───────── */}
+      <section id="vision" className="mx-auto max-w-3xl scroll-mt-20 px-6 py-20">
+        <Reveal>
+          <span className="text-xs font-semibold uppercase tracking-wider text-brand-300">
+            Our vision
+          </span>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            Every brand deserves to be the answer.
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-white/70">
+            Search is no longer a list of links. It's a single, authoritative
+            answer generated by an AI that has already decided who to trust.{" "}
+            <strong className="text-white">
+              That decision is made before the buyer ever types their question.
+            </strong>
+          </p>
+          <p className="mt-4 text-base leading-relaxed text-white/55">
+            We built AEO Pilot to solve this — a proprietary platform that
+            audits, scores, and grows your visibility across{" "}
+            <span className="text-sky-300">SEO</span>,{" "}
+            <span className="text-brand-300">AEO</span>, and{" "}
+            <span className="text-emerald-300">GEO</span>. One unified Search
+            Visibility Score. One workflow. A team of experts who execute every
+            fix. This is not an SEO tool with AI features bolted on — this is
+            the platform built from day one for the answer-engine era.
+          </p>
+        </Reveal>
+      </section>
+
+      {/* ───────── The three pillars ───────── */}
       <section id="pillars" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             One score for the whole search era
           </h2>
           <p className="mt-3 text-white/50">
-            Search is splitting three ways — the blue links, the direct answer, and
-            the generative reply. Most tools cover one. AEO Pilot covers all three.
+            Search is splitting three ways — the blue link, the direct answer,
+            and the generative reply. Most agencies cover one. We cover all three.
           </p>
         </Reveal>
 
@@ -229,20 +318,117 @@ export default function LandingPage() {
 
         <Reveal className="mt-10 text-center">
           <p className="text-sm text-white/45">
-            Three pillars → <span className="text-white/80">one Search Visibility Score</span>.
-            Enter a domain and see all three in under a minute.
+            Three pillars →{" "}
+            <span className="text-white/80">one Search Visibility Score</span>.
+            Enter your domain and see all three in under a minute.
           </p>
           <Link
             href="/app"
             className="mt-4 inline-flex rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-400"
           >
-            Get your free score →
+            Get your free visibility score →
           </Link>
         </Reveal>
       </section>
 
-      {/* ───────── SEO vs AEO Comparison ───────── */}
+      {/* ───────── SEO vs AEO vs GEO Comparison ───────── */}
       <SeoVsAeoComparison />
+
+      {/* ───────── Why Invest in Us ───────── */}
+      <section id="invest" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+            Why invest in us
+          </span>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            The market is moving. The window is now.
+          </h2>
+          <p className="mt-3 text-white/50">
+            AI search is not a future trend — it&apos;s the present default for
+            high-intent buyers. The brands investing in AI visibility today will
+            own the category tomorrow.
+          </p>
+        </Reveal>
+
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {WHY_INVEST.map((item, i) => (
+            <Reveal key={item.stat} delay={i * 80}>
+              <div className="h-full rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/5 to-transparent p-6 transition hover:border-amber-500/40">
+                <div className="text-4xl font-black text-amber-300">{item.stat}</div>
+                <div className="mt-1 text-sm font-semibold text-white">{item.label}</div>
+                <p className="mt-3 text-sm leading-relaxed text-white/50">{item.detail}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal className="mt-10">
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+            <p className="text-base leading-relaxed text-white/70">
+              <strong className="text-amber-300">The opportunity:</strong>{" "}
+              AI citation preference loops form early and compound fast. The brands
+              that earn citations now become the default cited brands for years.{" "}
+              <span className="font-semibold text-white">
+                First-mover advantage in AI search is worth more than a decade of
+                traditional SEO backlinks.
+              </span>
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-lg shadow-amber-600/30 transition hover:bg-amber-400"
+              >
+                Scan your brand now →
+              </Link>
+              <Link
+                href="/#pricing"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/5"
+              >
+                View investment plans
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ───────── Why Hire Us ───────── */}
+      <section id="why-hire-us" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <span className="text-xs font-semibold uppercase tracking-wider text-brand-300">
+            Why hire us
+          </span>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            We don&apos;t just audit. We dominate.
+          </h2>
+          <p className="mt-3 text-white/50">
+            We built the methodology, the platform, and the execution team that
+            makes your brand the answer — across every AI engine.
+          </p>
+        </Reveal>
+
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {WHY_HIRE_US.map((item, i) => (
+            <Reveal key={item.title} delay={i * 70}>
+              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:-translate-y-1 hover:border-brand-500/40 hover:bg-white/[0.04]">
+                <div className="text-3xl">{item.icon}</div>
+                <h3 className="mt-4 font-bold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/50">{item.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal className="mt-10 text-center">
+          <HireUsButton
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-brand-600/30 transition hover:bg-brand-400"
+          >
+            Hire our team →
+          </HireUsButton>
+          <p className="mt-3 text-xs text-white/35">
+            Done-for-you service · schema + entity graph + citations + monitoring
+          </p>
+        </Reveal>
+      </section>
 
       {/* ───────── Chat Pilot Interface ───────── */}
       <section className="mx-auto max-w-7xl px-6 py-20">
@@ -251,46 +437,21 @@ export default function LandingPage() {
             Meet your AEO Pilot
           </h2>
           <p className="mt-4 text-white/50">
-            Conversational scanning. Instant AEO insights. Every project in one place.
+            Conversational scanning. Instant visibility insights. Every project in one place.
           </p>
         </Reveal>
         <ChatPilotInterface />
-      </section>
-
-      {/* ───────── What is AEO Pilot (answer-optimized definition) ───────── */}
-      <section id="what" className="mx-auto max-w-3xl scroll-mt-20 px-6 py-16">
-        <Reveal>
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            What is AEO Pilot?
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-white/70">
-            <strong className="text-white">AEO Pilot</strong> is the all-in-one
-            platform for <strong className="text-white">SEO, AEO and GEO</strong>.
-            It audits your website and gives you one Search Visibility Score across
-            three pillars — <span className="text-sky-300">SEO</span> (rank in
-            Google &amp; Bing), <span className="text-brand-300">AEO</span> (be the
-            answer in AI engines), and <span className="text-emerald-300">GEO</span>
-            {" "}(get cited by ChatGPT, Gemini, Claude &amp; Perplexity) — then
-            generates the fixes that lift all three.
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-white/45">
-            Search is splitting into three: the blue links, the direct answer, and
-            the generative reply. Most tools cover one. AEO Pilot is the single
-            place to measure and grow your visibility across all of them — one
-            score, one workflow, one platform.
-          </p>
-        </Reveal>
       </section>
 
       {/* ───────── How it works ───────── */}
       <section id="how" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            From invisible to cited — in four moves
+            How we rank your brand — in four moves
           </h2>
           <p className="mt-3 text-white/50">
-            A fleet of agents does the work SEO teams can&apos;t: optimizing for
-            the single answer an AI gives.
+            A proprietary system — part platform, part expert team — that does
+            the work no traditional SEO agency can.
           </p>
         </Reveal>
 
@@ -314,11 +475,11 @@ export default function LandingPage() {
       <section id="features" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Everything you need to win AI Search
+            Everything built to win AI Search
           </h2>
           <p className="mt-3 text-white/50">
-            One platform for auditing, generating, publishing and tracking your
-            answer-engine presence.
+            A complete arsenal — auditing, generating, publishing and tracking —
+            purpose-built for the generative search era.
           </p>
         </Reveal>
 
@@ -342,11 +503,11 @@ export default function LandingPage() {
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent p-8 sm:p-12">
           <Reveal className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              We measure where it counts
+              We track every engine that matters
             </h2>
             <p className="mt-3 text-white/50">
-              For every engine, we track three things buyers feel: are you{" "}
-              <span className="text-white/80">mentioned</span>, at what{" "}
+              For every engine, we answer three questions buyers care about:{" "}
+              <span className="text-white/80">are you mentioned</span>, at what{" "}
               <span className="text-white/80">rank</span>, and are you{" "}
               <span className="text-white/80">cited</span>.
             </p>
@@ -372,37 +533,55 @@ export default function LandingPage() {
           <div className="relative overflow-hidden rounded-3xl border border-brand-500/30 bg-gradient-to-br from-brand-600/20 via-brand-500/5 to-transparent p-8 sm:p-14">
             <div className="max-w-2xl">
               <span className="text-xs font-semibold uppercase tracking-wider text-brand-300">
-                Done-for-you
+                Hire our team · done-for-you
               </span>
               <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                Short on time? Our experts repair your AEO for you.
+                Not enough time? We execute every fix for you.
               </h2>
               <p className="mt-4 text-white/55">
-                Every scan includes a managed-service option. We implement the
-                schema, build the entity graph and knowledge hub, and run the
-                citation campaign that gets your brand cited across the engines —
-                with a measurable-lift guarantee.
+                Every scan includes a managed-service option. Our team
+                implements schema, builds the entity graph and knowledge hub,
+                and runs citation campaigns that get your brand cited across all
+                AI engines — with a{" "}
+                <strong className="text-white">measurable lift guarantee</strong>.
               </p>
+              <ul className="mt-5 space-y-2">
+                {[
+                  "Schema & structured data implementation",
+                  "Entity graph & knowledge base creation",
+                  "FAQ corpus & citation-ready content",
+                  "AI citation campaign execution",
+                  "Monthly Share of AI Voice reports",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-white/70">
+                    <span className="text-brand-400">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
               <Link
-                href="/app"
+                href="mailto:sales@aeopilot.com?subject=Done-For-You%20AEO%20Service"
                 className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition hover:bg-white/90"
               >
-                Run a free scan to see your plan →
+                Talk to our team →
               </Link>
             </div>
           </div>
         </Reveal>
       </section>
 
-      {/* ───────── Pricing ───────── */}
+      {/* ───────── Pricing / Investment Plans ───────── */}
       <section id="pricing" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Freemium pricing that grows with you
+          <span className="text-xs font-semibold uppercase tracking-wider text-brand-300">
+            Investment plans
+          </span>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            Choose your path to AI search dominance
           </h2>
           <p className="mt-3 text-white/50">
-            Start with 2 free projects. Upgrade anytime to unlock more projects, 
-            AI monitoring, and done-for-you services.
+            Start free to see your visibility score. Upgrade to unlock
+            monitoring, content generation, and Done-For-You execution.
           </p>
         </Reveal>
         <div className="mt-12">
@@ -427,27 +606,34 @@ export default function LandingPage() {
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-800/60 p-10 text-center sm:p-16">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-600/20 via-transparent to-sky-500/10" />
-            <h2 className="mx-auto max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">
-              See your visibility in AI <span className="gradient-text">+</span> Google.
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand-300">
+              Start now · free
+            </span>
+            <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">
+              See exactly where your brand stands in AI{" "}
+              <span className="gradient-text">+ Google.</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/55">
-              One free scan, one Search Visibility Score across SEO, AEO &amp; GEO —
-              in under a minute. No key, no card.
+              One free visibility scan. One unified Search Visibility Score
+              across SEO, AEO & GEO — in under a minute. No API key. No credit
+              card.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/app"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-brand-600/30 transition hover:bg-brand-400"
               >
-                Launch AEO Pilot →
+                Get your free score →
               </Link>
-              <Link
-                href="/#pricing"
-                className="inline-flex items-center justify-center rounded-xl border border-white/15 px-8 py-4 text-sm font-semibold text-white/80 transition hover:bg-white/5"
+              <HireUsButton
+                className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Compare plans
-              </Link>
+                Hire our team →
+              </HireUsButton>
             </div>
+            <p className="mt-4 text-xs text-white/30">
+              Join brands that are already winning the AI answer.
+            </p>
           </div>
         </Reveal>
       </section>

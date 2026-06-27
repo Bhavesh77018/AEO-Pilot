@@ -1,13 +1,15 @@
 """Central configuration, loaded from environment / .env."""
 from __future__ import annotations
-
+import os
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(BASE_DIR, ".env")
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=env_path, extra="ignore")
 
     app_env: str = "development"
     secret_key: str = "change-me-in-prod"

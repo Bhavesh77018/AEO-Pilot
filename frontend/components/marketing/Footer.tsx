@@ -1,36 +1,41 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { LogoMark } from "@/components/Logo";
+import { ContactModal } from "./ContactModal";
 
 const COLS = [
   {
-    title: "Product",
+    title: "Services",
     links: [
-      { label: "How it works", href: "/#how" },
-      { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/#pricing" },
-      { label: "Launch app", href: "/app" },
+      { label: "Why Hire Us", href: "/#why-hire-us" },
+      { label: "Why Invest", href: "/#invest" },
+      { label: "Investment Plans", href: "/#pricing" },
+      { label: "Free Scan", href: "/app" },
     ],
   },
   {
     title: "Resources",
     links: [
       { label: "What is AEO?", href: "/learn" },
-      { label: "AEO Guides", href: "/guides" },
-      { label: "AEO vs SEO", href: "/comparisons" },
-      { label: "Glossary", href: "/glossary" },
+      { label: "SEO vs AEO vs GEO", href: "/comparisons" },
+      { label: "AEO Glossary", href: "/glossary" },
+      { label: "Use Cases", href: "/use-cases" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "Use cases", href: "/use-cases" },
+      { label: "Our Vision", href: "/#vision" },
       { label: "FAQ", href: "/faq" },
-      { label: "Contact sales", href: "mailto:sales@aeopilot.example" },
+      { label: "Hire our team", onClick: true },
     ],
   },
 ];
 
 export function Footer() {
+  const [modalOpen, setModalOpen] = useState(false);
   return (
     <footer className="border-t border-white/10 bg-ink-900/40">
       <div className="mx-auto max-w-7xl px-6 py-14">
@@ -41,8 +46,8 @@ export function Footer() {
               <span className="text-base font-semibold">AEO Pilot</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-white/40">
-              Make your startup discoverable by AI. The growth platform for the
-              answer-engine era.
+              The premium AI search agency. We rank your brand in ChatGPT,
+              Gemini, Claude & Perplexity — and measure every result.
             </p>
           </div>
           {COLS.map((c) => (
@@ -53,9 +58,15 @@ export function Footer() {
               <ul className="mt-3 space-y-2 text-sm">
                 {c.links.map((l) => (
                   <li key={l.label}>
-                    <Link href={l.href} className="text-white/60 transition hover:text-white">
-                      {l.label}
-                    </Link>
+                    {l.onClick ? (
+                      <button onClick={() => setModalOpen(true)} className="text-white/60 transition hover:text-white">
+                        {l.label}
+                      </button>
+                    ) : (
+                      <Link href={l.href!} className="text-white/60 transition hover:text-white">
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -67,6 +78,7 @@ export function Footer() {
           <span>Built for ChatGPT · Gemini · Claude · Perplexity · Copilot · Grok · DeepSeek</span>
         </div>
       </div>
+      <ContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </footer>
   );
 }

@@ -10,21 +10,80 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 type Props = {
   plan: { id: string; name: string; cta: string; ctaHref: string; highlight?: boolean };
   period: "monthly" | "annual";
-  enabled: boolean; // billing configured?
+  enabled: boolean;
 };
 
-type Stage = "idle" | "checking" | "starting" | "paying" | "verifying" | "success" | "error";
+type Stage =
+  | "idle"
+  | "checking"
+  | "starting"
+  | "paying"
+  | "verifying"
+  | "success"
+  | "error";
+
+const STEPS: { key: Stage; label: string }[] = [
+  { key: "checking", label: "Auth" },
+  { key: "starting", label: "Order" },
+  { key: "paying", label: "Pay" },
+  { key: "verifying", label: "Verify" },
+  { key: "success", label: "Done" },
+];
+
+function StepProgress({ stage }: { stage: Stage }) {
+  if (stage === "idle" || stage === "error") return null;
+  const activeIdx = STEPS.findIndex((s) => s.key === stage);
+
+  return (
+    <div className="mt-3 flex items-center justify-center gap-1">
+      {STEPS.map((step, i) => {
+        const done = i < activeIdx || stage === "success";
+        const active = i === activeIdx && stage !== "success";
+        return (
+          <div key={step.key} className="flex items-center gap-1">
+            <div className="flex flex-col items-center gap-0.5">
+              <div
+                className={`h-1.5 w-6 rounded-full transition-all duration-500 ${
+                  done
+                    ? "bg-emerald-400"
+                    : active
+                      ? "animate-pulse bg-brand-400"
+                      : "bg-white/10"
+                }`}
+              />
+              <span
+                className={`text-[9px] font-medium transition-colors ${
+                  done ? "text-emerald-400" : active ? "text-brand-300" : "text-white/20"
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div
+                className={`mb-3 h-px w-3 transition-colors ${
+                  done ? "bg-emerald-400/40" : "bg-white/10"
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function CheckoutButton({ plan, period, enabled }: Props) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [coldStart, setColdStart] = useState(false);
 
   const cls = plan.highlight
-    ? "bg-brand-500 text-white hover:bg-brand-400"
+    ? "bg-brand-500 text-white hover:bg-brand-400 shadow-lg shadow-brand-600/30"
     : "border border-white/15 text-white/80 hover:bg-white/5";
 
-  // Billing off → keep the original CTA as a plain link (e.g. → /app).
+  // Billing off → plain link
   if (!enabled) {
     return (
       <Link
@@ -39,13 +98,15 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
   function fail(msg: string) {
     setError(msg);
     setStage("error");
+    setColdStart(false);
   }
 
   async function checkout() {
     setError(null);
+    setColdStart(false);
     setStage("checking");
 
-    // ── Stage 1: require login BEFORE any payment ─────────────────────
+    // ── Stage 1: require login ─────────────────────────────────────────
     let userId: string | undefined;
     let email: string | undefined;
     if (isSupabaseConfigured) {
@@ -57,22 +118,26 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
         /* treat as logged out */
       }
       if (!userId) {
-        // Send them to sign in first, then back to pricing to complete checkout.
         router.push(`/login?next=${encodeURIComponent("/#pricing")}`);
         return;
       }
     }
 
-    // ── Stage 2: create the order (backend may be cold-starting) ──────
+    // ── Stage 2: create order ──────────────────────────────────────────
     setStage("starting");
+    // After 3s without response, show cold-start hint
+    const coldTimer = setTimeout(() => setColdStart(true), 3000);
     let order;
     try {
       order = await createOrder({ plan: plan.id, period, email });
     } catch (e) {
+      clearTimeout(coldTimer);
       return fail(orderError(e));
     }
+    clearTimeout(coldTimer);
+    setColdStart(false);
 
-    // ── Stage 3: load the secure checkout script ──────────────────────
+    // ── Stage 3: load checkout script ─────────────────────────────────
     let scriptOk = false;
     try {
       scriptOk = await loadRazorpay();
@@ -80,10 +145,12 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
       scriptOk = false;
     }
     if (!scriptOk) {
-      return fail("Couldn't load the secure checkout. Disable any ad-blocker and try again.");
+      return fail(
+        "Couldn't load the secure checkout. Disable any ad-blocker and try again."
+      );
     }
 
-    // ── Stage 4: open Razorpay & handle the outcome ───────────────────
+    // ── Stage 4: open Razorpay ─────────────────────────────────────────
     setStage("paying");
     try {
       const rzp = new (window as any).Razorpay({
@@ -95,10 +162,9 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
         order_id: order.order_id,
         prefill: email ? { email } : undefined,
         theme: { color: "#6366f1" },
-        // User closed the modal without paying — not an error.
         modal: { ondismiss: () => setStage("idle") },
         handler: async (resp: any) => {
-          // ── Stage 5: verify the signature server-side ───────────────
+          // ── Stage 5: verify ────────────────────────────────────────
           setStage("verifying");
           try {
             await verifyPayment({
@@ -111,19 +177,21 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
             setTimeout(() => {
               router.push("/app");
               router.refresh();
-            }, 1600);
+            }, 2000);
           } catch {
-            // Payment likely went through but we couldn't confirm it — reassure.
             fail(
               `Payment received, but we couldn't confirm it automatically. ` +
-                `Save your payment id (${resp.razorpay_payment_id}) and email ` +
-                `support@aeopilot.in — you won't be charged again.`,
+                `Save your payment ID (${resp.razorpay_payment_id}) and email ` +
+                `support@aeopilot.in — you won't be charged again.`
             );
           }
         },
       });
       rzp.on("payment.failed", (r: any) => {
-        fail(r?.error?.description || "Payment failed — no money was deducted. Please try again.");
+        fail(
+          r?.error?.description ||
+            "Payment failed — no money was deducted. Please try again."
+        );
       });
       rzp.open();
     } catch {
@@ -131,38 +199,60 @@ export function CheckoutButton({ plan, period, enabled }: Props) {
     }
   }
 
-  const label =
+  const busy = stage !== "idle" && stage !== "error";
+
+  const buttonLabel =
     stage === "checking"
-      ? "Checking…"
+      ? "Authenticating…"
       : stage === "starting"
-        ? "Starting checkout…"
+        ? "Creating order…"
         : stage === "paying"
           ? "Opening payment…"
           : stage === "verifying"
             ? "Confirming payment…"
             : stage === "success"
-              ? "✓ Subscribed — redirecting…"
+              ? "✓ Subscribed!"
               : stage === "error"
                 ? "Try again"
                 : plan.cta;
-
-  const busy = stage !== "idle" && stage !== "error";
 
   return (
     <div className="mt-5">
       <button
         onClick={checkout}
         disabled={busy}
-        className={`block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition disabled:opacity-70 ${cls}`}
+        className={`relative block w-full overflow-hidden rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition disabled:opacity-80 ${cls}`}
       >
-        {label}
+        {/* Success shimmer */}
+        {stage === "success" && (
+          <span className="absolute inset-0 animate-pulse bg-emerald-500/20" />
+        )}
+        <span className="relative">{buttonLabel}</span>
       </button>
-      {stage === "starting" && (
-        <p className="mt-2 text-center text-[11px] text-white/40">
-          Waking the server — this can take a few seconds…
+
+      {/* Step progress bar */}
+      <StepProgress stage={stage} />
+
+      {/* Cold-start hint */}
+      {coldStart && stage === "starting" && (
+        <p className="mt-2 text-center text-[11px] text-white/40 animate-pulse">
+          Server is waking up — this can take a few seconds…
         </p>
       )}
-      {error && <p className="mt-2 text-center text-[11px] leading-relaxed text-red-400">{error}</p>}
+
+      {/* Success message */}
+      {stage === "success" && (
+        <p className="mt-2 text-center text-[11px] text-emerald-400">
+          Welcome to {plan.name}! Redirecting to your dashboard…
+        </p>
+      )}
+
+      {/* Error */}
+      {error && (
+        <p className="mt-2 text-center text-[11px] leading-relaxed text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

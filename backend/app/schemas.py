@@ -11,6 +11,13 @@ class ProjectCreate(BaseModel):
     name: str | None = Field(default=None, description="Display name; defaults to the domain")
     domain: str = Field(description="Bare domain or URL, e.g. stripe.com")
 
+class ContactCreate(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    domain: str | None = None
+    message: str | None = None
+
 
 class ProjectOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

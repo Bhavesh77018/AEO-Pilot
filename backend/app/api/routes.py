@@ -14,7 +14,7 @@ from ..agents.orchestrator import run_scan
 from ..auth import get_current_user
 from ..config import settings
 from ..db import SessionLocal, get_db
-from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan, Subscription
+from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan, Subscription, ContactSubmission
 from ..schemas import (
     BillingConfig,
     MonitoringRunDetail,
@@ -24,6 +24,7 @@ from ..schemas import (
     PaymentResult,
     PaymentVerify,
     ProjectCreate,
+    ContactCreate,
     ProjectOut,
     PromptCreate,
     PromptOut,
@@ -319,6 +320,28 @@ def verify_payment(body: PaymentVerify, db: Session = Depends(get_db)):
     if not ok:
         raise HTTPException(400, "Payment signature verification failed")
     return PaymentResult(status="active")
+
+
+# ── Contact ───────────────────────────────────────────────────────────
+@router.post("/contact", status_code=201)
+def submit_contact(body: ContactCreate, db: Session = Depends(get_db)):
+    submission = ContactSubmission(
+        name=body.name,
+        email=body.email,
+        phone=body.phone,
+        domain=body.domain,
+        message=body.message,
+    )
+    db.add(submission)
+    db.commit()
+    # Mock email sending to info@dialforit.com
+    print(f"[MAIL MOCK] New Contact Submission:")
+    print(f"  From: {body.name} <{body.email}>")
+    print(f"  Phone: {body.phone}")
+    print(f"  Domain: {body.domain}")
+    print(f"  Message: {body.message}")
+    print(f"  -- Sent to info@dialforit.com --")
+    return {"status": "ok"}
 
 
 # ── helpers ───────────────────────────────────────────────────────────

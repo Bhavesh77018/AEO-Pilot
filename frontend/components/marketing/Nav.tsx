@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/Logo";
+import { ContactModal } from "./ContactModal";
 
 const LINKS = [
-  { href: "/#how", label: "How it works" },
-  { href: "/#features", label: "Features" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/learn", label: "Learn" },
+  { href: "/#vision", label: "Vision" },
+  { href: "/#why-hire-us", label: "Why Hire Us" },
+  { href: "/#invest", label: "Why Invest" },
+  { href: "/#pricing", label: "Investment Plans" },
   { href: "/faq", label: "FAQ" },
 ];
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -52,11 +54,17 @@ export function Nav() {
           >
             Sign in
           </Link>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="hidden rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 sm:inline-flex"
+          >
+            Hire us
+          </button>
           <Link
             href="/app"
             className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-600/30 transition hover:bg-brand-400"
           >
-            Launch app →
+            Free scan →
           </Link>
           <button
             onClick={() => setOpen((o) => !o)}
@@ -82,6 +90,7 @@ export function Nav() {
           ))}
         </div>
       )}
+      <ContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </header>
   );
 }

@@ -3,14 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SignOutButton({ email }: { email: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  const qc = useQueryClient();
+
   async function signOut() {
     setLoading(true);
     await createClient().auth.signOut();
+    qc.clear(); // Clear cached queries (projects/scans) to prevent cross-user leakage
     router.push("/login");
     router.refresh();
   }

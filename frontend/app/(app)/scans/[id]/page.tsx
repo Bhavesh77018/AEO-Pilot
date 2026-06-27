@@ -34,7 +34,7 @@ export default function ScanPage() {
   const running = data.status === "pending" || data.status === "running";
 
   return (
-    <div className="space-y-6">
+    <div className="h-full overflow-y-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/app" className="text-sm text-white/50 hover:text-white">
           ← Projects

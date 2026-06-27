@@ -405,3 +405,27 @@ def _project_out(project: Project) -> ProjectOut:
         latest_scan_id=latest.id if latest else None,
         latest_score=latest.overall_score if latest else None,
     )
+
+
+@router.get("/billing/plan")
+def get_billing_plan(user: dict | None = Depends(get_current_user)):
+    ADMIN_EMAILS = [
+        "pankajjangid5510@gmail.com",
+    ]
+    if user and user.get("email") and user["email"].lower() in ADMIN_EMAILS:
+        return {
+            "plan": "agency",
+            "name": "Admin (Full Access)",
+            "project_limit": 9999,
+            "scan_limit": 9999,
+            "period": "lifetime",
+            "active_since": "2026-01-01T00:00:00Z"
+        }
+    return {
+        "plan": "starter",
+        "name": "Starter",
+        "project_limit": 2,
+        "scan_limit": 5,
+        "period": None,
+        "active_since": None
+    }

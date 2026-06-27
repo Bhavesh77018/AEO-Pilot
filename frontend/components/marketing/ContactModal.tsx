@@ -53,7 +53,7 @@ export function ContactModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className="relative w-full max-w-xl bg-gradient-to-b from-ink-900 to-ink-950 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 relative overflow-hidden animate-fade-up"
+        className="relative w-full max-w-xl bg-ink-900 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 relative overflow-hidden animate-fade-up"
         onClick={(e) => e.stopPropagation()}
         style={{ animationDuration: "0.4s" }}
       >
@@ -93,7 +93,7 @@ export function ContactModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           <>
             <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Hire our Team</h2>
             <p className="text-white/50 mb-8 text-sm leading-relaxed">
-              Ready to dominate AI answer engines? Tell us about your brand and we'll be in touch. Or email us directly at <a href="mailto:info@dialforit.com" className="text-brand-400 hover:text-brand-300 font-medium underline transition-colors">info@dialforit.com</a>.
+              Ready to dominate AI answer engines? Tell us about your brand and we'll be in touch. Or email us directly at <a href="mailto:info@aeopilot.in" className="text-brand-400 hover:text-brand-300 font-medium underline transition-colors">info@aeopilot.in</a>.
             </p>
 
             {error && (

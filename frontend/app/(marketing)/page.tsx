@@ -559,12 +559,11 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="mailto:sales@aeopilot.com?subject=Done-For-You%20AEO%20Service"
+              <HireUsButton
                 className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition hover:bg-white/90"
               >
                 Talk to our team →
-              </Link>
+              </HireUsButton>
             </div>
           </div>
         </Reveal>

@@ -82,6 +82,8 @@ def list_projects(
         stmt = stmt.where(Project.user_id == user["id"])
     else:
         # Auth disabled (local dev): only show anonymous projects to avoid leaking real user data
+        if settings.app_env.lower() in ("production", "prod"):
+            return []
         stmt = stmt.where(Project.user_id.is_(None))
     projects = db.scalars(stmt).all()
     return [_project_out(p) for p in projects]
@@ -364,6 +366,8 @@ def _check_owner(project: Project | None, user: dict | None) -> None:
     if not project:
         raise HTTPException(404, "Project not found")
     if not settings.auth_enabled:
+        if settings.app_env.lower() in ("production", "prod"):
+            raise HTTPException(404, "Project not found")
         if project.user_id is not None:
             raise HTTPException(404, "Project not found")
         return

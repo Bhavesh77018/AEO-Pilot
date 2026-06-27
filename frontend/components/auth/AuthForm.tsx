@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type Mode = "signin" | "signup" | "magic";
+type Mode = "signin" | "signup" | "magic" | "forgot";
 
 export function AuthForm({ next }: { next: string }) {
   const router = useRouter();
@@ -44,6 +44,12 @@ export function AuthForm({ next }: { next: string }) {
           setInfo("Account created. Check your email to confirm, then sign in.");
           setMode("signin");
         }
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${location.origin}/auth/callback?next=/reset-password`,
+        });
+        if (error) throw error;
+        setInfo("Check your email for a password reset link.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -93,6 +99,7 @@ export function AuthForm({ next }: { next: string }) {
         {(["signin", "signup", "magic"] as Mode[]).map((m) => (
           <button
             key={m}
+            type="button"
             onClick={() => {
               setMode(m);
               setError(null);
@@ -116,16 +123,33 @@ export function AuthForm({ next }: { next: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        {mode !== "magic" && (
-          <input
-            type="password"
-            required
-            minLength={6}
-            placeholder="Password (min 6 chars)"
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        {mode !== "magic" && mode !== "forgot" && (
+          <div className="space-y-1">
+            <input
+              type="password"
+              required
+              minLength={6}
+              placeholder="Password (min 6 chars)"
+              className="input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {mode === "signin" && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("forgot");
+                    setError(null);
+                    setInfo(null);
+                  }}
+                  className="text-[11px] text-brand-300 hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {error && <p className="text-xs text-red-400">{error}</p>}
@@ -138,17 +162,29 @@ export function AuthForm({ next }: { next: string }) {
               ? "Sign in"
               : mode === "signup"
                 ? "Create account"
-                : "Send magic link"}
+                : mode === "forgot"
+                  ? "Send reset link"
+                  : "Send magic link"}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-[11px] text-white/30">
-        By continuing you agree to the AEO Pilot terms. New here? Use{" "}
-        <button onClick={() => setMode("signup")} className="text-brand-300 underline">
-          Sign up
-        </button>
-        .
-      </p>
+      {mode === "forgot" && (
+        <p className="mt-4 text-center text-xs text-white/30">
+          <button onClick={() => setMode("signin")} className="text-brand-300 underline">
+            Back to sign in
+          </button>
+        </p>
+      )}
+
+      {mode !== "forgot" && (
+        <p className="mt-4 text-center text-[11px] text-white/30">
+          By continuing you agree to the AEO Pilot terms. New here? Use{" "}
+          <button onClick={() => setMode("signup")} className="text-brand-300 underline">
+            Sign up
+          </button>
+          .
+        </p>
+      )}
     </div>
   );
 }

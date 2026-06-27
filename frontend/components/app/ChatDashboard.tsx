@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import type { Project } from "@/lib/types";
 import { logUserQuery } from "@/lib/supabase/insights";
 import { LogoMark } from "@/components/Logo";
-import { SendIcon } from "@/components/Icons";
+import { SendIcon, TrashIcon } from "@/components/Icons";
 import { UpgradeModal } from "@/components/billing/UpgradeModal";
 import { ScanProgress } from "@/components/app/ScanProgress";
 
@@ -132,6 +132,15 @@ function extractDomain(input: string): string | null {
     .trim();
   if (DOMAIN_RE.test(cleaned)) return cleaned;
   return null;
+}
+
+function cleanDomain(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .split("/")[0];
 }
 
 /* ─── response builder ────────────────────────────────────────────── */
@@ -261,6 +270,27 @@ export function ChatDashboard({
     },
   });
 
+  const deleteProject = useMutation({
+    mutationFn: (projectId: string) => api.deleteProject(projectId),
+    onSuccess: (_, deletedId) => {
+      qc.invalidateQueries({ queryKey: ["projects", userEmail] });
+      setMessages((prev) =>
+        prev.filter((m) => !(m.type === "project" && m.project?.id === deletedId))
+      );
+    },
+    onError: (e) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          type: "text",
+          content: `❌ Couldn't delete project — ${(e as Error).message.slice(0, 140)}`,
+        },
+      ]);
+    },
+  });
+
   /* initialise messages once data loads */
   useEffect(() => {
     if (!isLoading && messages.length === 0) {
@@ -355,7 +385,13 @@ export function ChatDashboard({
   const handleSend = async (e: React.FormEvent | null, overrideText?: string) => {
     if (e) e.preventDefault();
     const text = (overrideText ?? input).trim();
-    if (!text || !userEmail) return;
+    if (!text) return;
+
+    if (!userEmail) {
+      const domain = extractDomain(text) || cleanDomain(text) || text;
+      router.push(`/login?next=${encodeURIComponent(`/app?domain=${domain}`)}`);
+      return;
+    }
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -537,12 +573,13 @@ export function ChatDashboard({
 
                     {/* Project card */}
                     {msg.type === "project" && msg.project && (
-                      <button
-                        onClick={() => handleProjectClick(msg.project!)}
-                        className="group w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-brand-500/40 hover:bg-white/[0.06]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
+                      <div className="relative w-full max-w-md">
+                        <button
+                          onClick={() => handleProjectClick(msg.project!)}
+                          className="group w-full rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-brand-500/40 hover:bg-white/[0.06]"
+                        >
+                          <div className="flex items-start justify-between gap-3 pr-6">
+                            <div className="min-w-0">
                             <h3 className="truncate font-semibold text-white">
                               {msg.project.domain}
                             </h3>
@@ -586,6 +623,19 @@ export function ChatDashboard({
                           </span>
                         </div>
                       </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm("Are you sure you want to delete this project?")) {
+                            deleteProject.mutate(msg.project!.id);
+                          }
+                        }}
+                        className="absolute top-3 right-3 p-2 text-white/20 hover:text-red-400 transition"
+                        title="Delete project"
+                      >
+                        <TrashIcon size={16} />
+                      </button>
+                    </div>
                     )}
 
                     {/* Limit card */}
@@ -676,12 +726,12 @@ export function ChatDashboard({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
                   !userEmail
-                    ? "Sign in to start analyzing…"
+                    ? "Type a domain like stripe.com, or ask me anything…"
                     : projects.length >= projectLimit
                       ? "Upgrade to add more projects…"
                       : "Type a domain like stripe.com, or ask me anything…"
                 }
-                disabled={!userEmail || isTyping || createProject.isPending}
+                disabled={isTyping || createProject.isPending}
                 className="w-full rounded-xl border border-white/10 bg-ink-900/80 px-4 py-3 pr-10 text-sm text-white placeholder-white/25 transition focus:border-brand-500/50 focus:outline-none focus:ring-1 focus:ring-brand-500/20 disabled:opacity-50"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -693,7 +743,7 @@ export function ChatDashboard({
             </div>
             <button
               type="submit"
-              disabled={!input.trim() || isTyping || !userEmail || createProject.isPending}
+              disabled={!input.trim() || isTyping || createProject.isPending}
               className="rounded-xl bg-brand-600 px-4 py-3 font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-500 disabled:opacity-40 flex items-center gap-2"
             >
               {isTyping || createProject.isPending ? (

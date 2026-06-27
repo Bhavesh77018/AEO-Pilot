@@ -2,12 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PROTECTED = ["/app", "/scans"];
+const PROTECTED = ["/scans"];
 
 export async function middleware(request: NextRequest) {
   try {
-    // If Supabase isn't configured, run fully open (no auth gate).
-    if (!isSupabaseConfigured) return NextResponse.next();
+    // Bypass auth ONLY for localhost testing
+    const hostname = request.nextUrl.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return NextResponse.next();
+    }
+    
+    // For all other hostnames (like aeopilot.in), strictly enforce auth
+    // (If Supabase is misconfigured in production, login will simply fail, which is secure).
 
     const { response, user } = await updateSession(request);
     const path = request.nextUrl.pathname;

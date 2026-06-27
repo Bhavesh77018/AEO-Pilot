@@ -80,6 +80,9 @@ def list_projects(
         if not user:
             return []
         stmt = stmt.where(Project.user_id == user["id"])
+    else:
+        # Auth disabled (local dev): only show anonymous projects to avoid leaking real user data
+        stmt = stmt.where(Project.user_id.is_(None))
     projects = db.scalars(stmt).all()
     return [_project_out(p) for p in projects]
 
@@ -91,6 +94,17 @@ def get_project(
     user: dict | None = Depends(get_current_user),
 ):
     return _project_out(_require_project(db, project_id, user))
+
+
+@router.delete("/projects/{project_id}", status_code=204)
+def delete_project(
+    project_id: str,
+    db: Session = Depends(get_db),
+    user: dict | None = Depends(get_current_user),
+):
+    project = _require_project(db, project_id, user)
+    db.delete(project)
+    db.commit()
 
 
 # ── Scans ─────────────────────────────────────────────────────────────
@@ -347,9 +361,13 @@ def submit_contact(body: ContactCreate, db: Session = Depends(get_db)):
 # ── helpers ───────────────────────────────────────────────────────────
 def _check_owner(project: Project | None, user: dict | None) -> None:
     """Enforce per-user ownership. 404 (not 403) so existence isn't revealed."""
+    if not project:
+        raise HTTPException(404, "Project not found")
     if not settings.auth_enabled:
+        if project.user_id is not None:
+            raise HTTPException(404, "Project not found")
         return
-    if not project or not user or project.user_id != user["id"]:
+    if not user or project.user_id != user["id"]:
         raise HTTPException(404, "Project not found")
 
 

@@ -8,6 +8,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env_path = os.path.join(BASE_DIR, ".env")
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(env_path)
+except ImportError:
+    pass
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=env_path, extra="ignore")
 

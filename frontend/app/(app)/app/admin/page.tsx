@@ -47,7 +47,7 @@ export default async function AdminPage() {
   }
 
   // Admin RLS lets these read all rows.
-  const [usersRes, queriesRes, allIdsRes, waitlistRes] = await Promise.all([
+  const [usersRes, queriesRes, allIdsRes, waitlistRes, contactsRes] = await Promise.all([
     supabase
       .from("profiles")
       .select("id,email,full_name,plan,role,created_at,last_seen_at")
@@ -59,12 +59,18 @@ export default async function AdminPage() {
       .limit(100),
     supabase.from("user_queries").select("user_id"),
     supabase.from("waitlist").select("*", { count: "exact", head: true }),
+    supabase
+      .from("contact_submissions")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false }),
   ]);
 
   const users = usersRes.data ?? [];
   const queries = queriesRes.data ?? [];
   const totalQueries = queriesRes.count ?? queries.length;
   const waitlistCount = waitlistRes.count ?? 0;
+  const contacts = contactsRes.data ?? [];
+  const contactsCount = contactsRes.count ?? 0;
 
   // per-user query tally
   const counts = new Map<string, number>();
@@ -75,6 +81,7 @@ export default async function AdminPage() {
   const stats = [
     { label: "Users", value: users.length },
     { label: "Queries", value: totalQueries },
+    { label: "Contacts", value: contactsCount },
     { label: "Paid users", value: users.filter((u) => u.plan && u.plan !== "free").length },
     { label: "Waitlist", value: waitlistCount },
   ];
@@ -159,6 +166,46 @@ export default async function AdminPage() {
           Latest user queries ({totalQueries})
         </h2>
         <QueryFeed initial={queries} />
+
+        {/* contact submissions */}
+        <h2 className="mb-3 mt-10 text-sm font-semibold uppercase tracking-wider text-white/50">
+          Contact Submissions ({contactsCount})
+        </h2>
+        <div className="overflow-hidden rounded-2xl border border-white/10 mb-8">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-white/[0.03] text-xs uppercase tracking-wide text-white/40">
+              <tr>
+                <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Email</th>
+                <th className="px-4 py-3 font-medium">Phone</th>
+                <th className="px-4 py-3 font-medium">Domain</th>
+                <th className="px-4 py-3 font-medium">Message</th>
+                <th className="px-4 py-3 font-medium">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {contacts.map((c: any) => (
+                <tr key={c.id} className="hover:bg-white/[0.02]">
+                  <td className="px-4 py-3 text-white/85">{c.name}</td>
+                  <td className="px-4 py-3 text-white/60">{c.email}</td>
+                  <td className="px-4 py-3 text-white/60">{c.phone || "-"}</td>
+                  <td className="px-4 py-3 text-white/60">{c.domain || "-"}</td>
+                  <td className="px-4 py-3 text-white/60 max-w-[200px] truncate" title={c.message}>{c.message || "-"}</td>
+                  <td className="px-4 py-3 text-xs text-white/40">
+                    {new Date(c.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {contacts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-white/40">
+                    No contact submissions yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <p className="mt-8 text-center text-xs text-white/25">
           Read-only admin · powered by Supabase RLS

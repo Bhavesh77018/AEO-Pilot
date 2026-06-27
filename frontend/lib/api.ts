@@ -29,6 +29,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.text();
     throw new Error(`${res.status} ${res.statusText}: ${body}`);
   }
+  if (res.status === 204) return null as T;
   return res.json() as Promise<T>;
 }
 
@@ -50,6 +51,8 @@ export const api = {
     }),
   getProject: (projectId: string) =>
     req<Project>(`/api/v1/projects/${projectId}`),
+  deleteProject: (projectId: string) =>
+    req<{ status: string }>(`/api/v1/projects/${projectId}`, { method: "DELETE" }),
   startScan: (projectId: string) =>
     req<ScanSummary>(`/api/v1/projects/${projectId}/scans`, { method: "POST" }),
   getScan: (scanId: string) => req<ScanDetail>(`/api/v1/scans/${scanId}`),

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ChatDashboard } from "@/components/app/ChatDashboard";
@@ -18,6 +18,7 @@ import {
   HistoryIcon,
   UpgradeIcon,
   AccountIcon,
+  TrashIcon,
 } from "@/components/Icons";
 import type { Project } from "@/lib/types";
 
@@ -42,6 +43,7 @@ function AppPageInner() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const qc = useQueryClient();
 
   /* auth */
   useEffect(() => {
@@ -82,6 +84,16 @@ function AppPageInner() {
   const planKey = plan?.plan ?? "starter";
   const projectLimit = plan?.project_limit ?? 2;
   const projectList: Project[] = projects.data ?? [];
+
+  const deleteProject = useMutation({
+    mutationFn: (projectId: string) => api.deleteProject(projectId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["projects", userEmail] });
+    },
+    onError: (e) => {
+      alert(`Couldn't delete project: ${(e as Error).message}`);
+    },
+  });
 
   const handleProjectClick = (project: Project) => {
     setActiveProjectId(project.id);
@@ -171,7 +183,7 @@ function AppPageInner() {
                 <button
                   key={project.id}
                   onClick={() => handleProjectClick(project)}
-                  className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition ${
+                  className={`group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition ${
                     activeProjectId === project.id
                       ? "bg-brand-600/20 text-white"
                       : "text-white/60 hover:bg-white/5 hover:text-white"
@@ -182,14 +194,28 @@ function AppPageInner() {
                     {project.domain.slice(0, 2).toUpperCase()}
                   </span>
                   {sidebarOpen && (
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs font-medium">{project.domain}</div>
-                      {project.latest_score !== null && (
-                        <div className={`text-[10px] ${scoreColor(project.latest_score)}`}>
-                          Score: {Math.round(project.latest_score)}
-                        </div>
-                      )}
-                    </div>
+                    <>
+                      <div className="min-w-0 flex-1 pr-4">
+                        <div className="truncate text-xs font-medium">{project.domain}</div>
+                        {project.latest_score !== null && (
+                          <div className={`text-[10px] ${scoreColor(project.latest_score)}`}>
+                            Score: {Math.round(project.latest_score)}
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm("Are you sure you want to delete this project?")) {
+                            deleteProject.mutate(project.id);
+                          }
+                        }}
+                        className="absolute right-2 p-1 text-white/20 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"
+                        title="Delete project"
+                      >
+                        <TrashIcon size={14} />
+                      </div>
+                    </>
                   )}
                 </button>
               ))

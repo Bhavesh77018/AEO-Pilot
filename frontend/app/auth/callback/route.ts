@@ -16,7 +16,13 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    return NextResponse.redirect(`${origin}/login?error=auth&msg=${encodeURIComponent(error.message)}`);
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  const errDesc = searchParams.get("error_description") || searchParams.get("error");
+  if (errDesc) {
+    return NextResponse.redirect(`${origin}/login?error=auth&msg=${encodeURIComponent(errDesc)}`);
+  }
+
+  return NextResponse.redirect(`${origin}/login?error=auth&msg=no_code_provided`);
 }

@@ -26,7 +26,17 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        origins = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        if "*" in origins:
+            return ["*"]
+        
+        expanded = set(origins)
+        for o in origins:
+            if o.startswith("https://") and not o.startswith("https://www."):
+                expanded.add(o.replace("https://", "https://www."))
+            elif o.startswith("https://www."):
+                expanded.add(o.replace("https://www.", "https://"))
+        return list(expanded)
 
     # Supabase — used to VERIFY the user's access token for per-user data
     # isolation. Both are public (the anon/publishable key is browser-safe).

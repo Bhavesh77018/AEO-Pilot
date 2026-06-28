@@ -111,7 +111,7 @@ type Intent =
 
 function classifyIntent(input: string): Intent {
   const t = input.toLowerCase().trim();
-  if (DOMAIN_RE.test(t.replace(/^(add|scan|check|analyze)\s+/i, "").trim())) return "add_domain";
+  if (DOMAIN_RE.test(cleanDomain(t.replace(/^(add|scan|check|analyze)\s+/i, "").trim()))) return "add_domain";
   if (/^(add|new|create|track)\s+/.test(t)) return "add_domain";
   if (/^(scan|analyze|check|run)\s+/.test(t)) return "scan_project";
   if (/\b(price|pricing|plan|cost|upgrade|invest|pay)\b/.test(t)) return "pricing";
@@ -120,16 +120,17 @@ function classifyIntent(input: string): Intent {
   if (/\b(help|what can|what do|how do)\b/.test(t)) return "help";
   if (/\b(hi|hello|hey|hiya|yo)\b/.test(t)) return "greet";
   if (/\b(list|show|my projects?|all projects?)\b/.test(t)) return "list_projects";
-  if (DOMAIN_RE.test(t)) return "add_domain";
+  if (DOMAIN_RE.test(cleanDomain(t))) return "add_domain";
   return "unknown";
 }
 
 function extractDomain(input: string): string | null {
-  const cleaned = input
-    .toLowerCase()
-    .replace(/^(add|scan|check|analyze|new|create|track)\s+/i, "")
-    .replace(/^(project|domain|site|website|url)\s*/i, "")
-    .trim();
+  const cleaned = cleanDomain(
+    input
+      .toLowerCase()
+      .replace(/^(add|scan|check|analyze|new|create|track)\s+/i, "")
+      .replace(/^(project|domain|site|website|url)\s*/i, "")
+  );
   if (DOMAIN_RE.test(cleaned)) return cleaned;
   return null;
 }

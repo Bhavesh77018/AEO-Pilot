@@ -48,6 +48,8 @@ def create_project(
         raise HTTPException(401, "Sign in to create a project")
     raw = body.domain.strip().rstrip("/")
     host = raw.replace("https://", "").replace("http://", "").split("/")[0]
+    if host.startswith("www."):
+        host = host[4:]
     hostname = host.split(":")[0]
     is_local = hostname in ("localhost", "127.0.0.1")
     if not host or ("." not in hostname and not is_local):

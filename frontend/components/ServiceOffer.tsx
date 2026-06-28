@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { ServiceOffer as Offer } from "@/lib/types";
 
 const SEV: Record<string, string> = {
@@ -9,18 +9,34 @@ const SEV: Record<string, string> = {
   low: "text-sky-300",
 };
 
-function money(n: number, currency = "USD") {
-  return new Intl.NumberFormat("en-US", {
+function money(n: number, isIndia: boolean = false) {
+  const amount = isIndia ? n * 83 : n;
+  const currency = isIndia ? "INR" : "USD";
+  const locale = isIndia ? "en-IN" : "en-US";
+  
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(n);
+  }).format(amount);
 }
 
 export function ServiceOffer({ offer }: { offer: Offer }) {
   const pkg = offer.recommended_package;
   const [booked, setBooked] = useState(false);
   const [cart, setCart] = useState<Set<string>>(new Set());
+  const [isIndia, setIsIndia] = useState(false);
+
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz && (tz.includes("Calcutta") || tz.includes("Kolkata"))) {
+        setIsIndia(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const toggle = (title: string) =>
     setCart((prev) => {
@@ -111,12 +127,12 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
           <div className="rounded-2xl border border-brand-500/30 bg-ink-900/60 p-5">
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-bold text-white">
-                {money(pkg.price_one_time, pkg.currency)}
+                {money(pkg.price_one_time, isIndia)}
               </span>
               <span className="text-sm text-white/40">one-time</span>
             </div>
             <div className="mt-1 text-sm text-white/60">
-              + {money(pkg.price_monthly, pkg.currency)}
+              + {money(pkg.price_monthly, isIndia)}
               <span className="text-white/40">/mo retainer</span>
             </div>
             <div className="mt-3 text-xs text-white/40">
@@ -145,7 +161,7 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
           </h4>
           {cart.size > 0 && (
             <span className="text-xs text-white/50">
-              {cart.size} selected · {money(cartTotal)}
+              {cart.size} selected · {money(cartTotal, isIndia)}
             </span>
           )}
         </div>
@@ -168,7 +184,7 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span className="text-sm font-semibold tabular-nums text-white">
-                    {money(item.price, item.currency)}
+                    {money(item.price, isIndia)}
                   </span>
                   <button
                     onClick={() => toggle(item.title)}
@@ -191,7 +207,7 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
             onClick={() => setBooked(true)}
             className="mt-4 w-full rounded-xl border border-brand-500/40 bg-brand-500/10 px-4 py-3 text-sm font-semibold text-brand-200 transition hover:bg-brand-500/20"
           >
-            Checkout {cart.size} fix{cart.size > 1 ? "es" : ""} · {money(cartTotal)}
+            Checkout {cart.size} fix{cart.size > 1 ? "es" : ""} · {money(cartTotal, isIndia)}
           </button>
         )}
 
@@ -212,10 +228,10 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
               >
                 <div className="text-xs font-semibold text-white/80">{t.name}</div>
                 <div className="mt-1 text-sm font-bold text-white">
-                  {money(t.price_one_time)}
+                  {money(t.price_one_time, isIndia)}
                 </div>
                 <div className="text-[11px] text-white/40">
-                  +{money(t.price_monthly)}/mo · {t.timeline_weeks}w
+                  +{money(t.price_monthly, isIndia)}/mo · {t.timeline_weeks}w
                 </div>
               </div>
             ))}

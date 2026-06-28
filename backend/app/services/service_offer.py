@@ -18,7 +18,7 @@ _TIERS = [
     {
         "key": "overhaul", "name": "Full AEO Authority Overhaul",
         "badge": "Flagship", "max_score": 35,
-        "price_one_time": 12000, "price_monthly": 2500, "timeline_weeks": 10,
+        "price_one_time": 2500, "price_monthly": 500, "timeline_weeks": 10,
         "summary": "Top-to-bottom rebuild of how AI engines see your brand: "
                    "schema, entity graph, knowledge hub, FAQ corpus, and a "
                    "citation-building campaign — fully implemented by our team.",
@@ -28,7 +28,7 @@ _TIERS = [
     {
         "key": "builder", "name": "AEO Authority Builder",
         "badge": "Most popular", "max_score": 60,
-        "price_one_time": 7500, "price_monthly": 1800, "timeline_weeks": 6,
+        "price_one_time": 1500, "price_monthly": 300, "timeline_weeks": 6,
         "summary": "We close your biggest answer-engine gaps — schema coverage, "
                    "entity strength, and a high-intent FAQ + comparison library "
                    "that LLMs love to cite.",
@@ -38,7 +38,7 @@ _TIERS = [
     {
         "key": "accelerator", "name": "AI Visibility Accelerator",
         "badge": "Best value", "max_score": 80,
-        "price_one_time": 4000, "price_monthly": 1200, "timeline_weeks": 4,
+        "price_one_time": 800, "price_monthly": 200, "timeline_weeks": 4,
         "summary": "You're already AI-readable — we push you to the top of the "
                    "answer. Citation outreach, entity reinforcement, and "
                    "continuous prompt monitoring.",
@@ -47,7 +47,7 @@ _TIERS = [
     {
         "key": "maintenance", "name": "Authority Maintenance & Monitoring",
         "badge": "Retainer", "max_score": 101,
-        "price_one_time": 1500, "price_monthly": 750, "timeline_weeks": 2,
+        "price_one_time": 300, "price_monthly": 150, "timeline_weeks": 2,
         "summary": "Defend your lead. Ongoing AI-visibility tracking, competitor "
                    "watch, and monthly content refreshes so you stay the cited "
                    "answer as models update.",
@@ -72,7 +72,7 @@ def _project_score(score: float, recs: list) -> float:
 
 
 def _alacarte_price(impact: int, severity: str) -> int:
-    base = max(500, impact * 300)
+    base = max(100, impact * 100)
     if severity == "high":
         base = int(base * 1.4)
     elif severity == "medium":

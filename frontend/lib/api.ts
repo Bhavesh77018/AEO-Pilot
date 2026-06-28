@@ -16,18 +16,30 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${apiBase()}${path}`, {
-    cache: "no-store",
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(await authHeaders()),
-      ...(init?.headers as Record<string, string> | undefined),
-    },
-  });
+  let res: Response;
+  const fullUrl = `${apiBase()}${path}`;
+  try {
+    res = await fetch(fullUrl, {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+        ...(init?.headers as Record<string, string> | undefined),
+      },
+      ...init,
+    });
+  } catch (err: any) {
+    throw new Error(`Network Error: Cannot reach backend at ${fullUrl}. Check CORS or URL typos.`);
+  }
+
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${body}`);
+    let body: any;
+    try {
+      body = await res.json();
+    } catch {
+      body = {};
+    }
+    throw new Error(body.detail || `HTTP ${res.status} Error at ${path}`);
   }
   if (res.status === 204) return null as T;
   return res.json() as Promise<T>;

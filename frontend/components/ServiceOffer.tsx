@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import type { ServiceOffer as Offer } from "@/lib/types";
+import { ContactModal } from "@/components/marketing/ContactModal";
 
 const SEV: Record<string, string> = {
   high: "text-red-300",
@@ -23,7 +24,7 @@ function money(n: number, isIndia: boolean = false) {
 
 export function ServiceOffer({ offer }: { offer: Offer }) {
   const pkg = offer.recommended_package;
-  const [booked, setBooked] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [cart, setCart] = useState<Set<string>>(new Set());
   const [isIndia, setIsIndia] = useState(false);
 
@@ -140,11 +141,10 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
             </div>
 
             <button
-              onClick={() => setBooked(true)}
-              disabled={booked}
-              className="mt-4 w-full rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-400 disabled:opacity-60"
+              onClick={() => setModalOpen(true)}
+              className="mt-4 w-full rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-400"
             >
-              {booked ? "✓ Request received — we'll be in touch" : offer.cta}
+              {offer.cta}
             </button>
             <p className="mt-2 text-center text-[11px] text-white/30">
               No commitment · 30-min strategy call
@@ -204,7 +204,7 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
 
         {cart.size > 0 && (
           <button
-            onClick={() => setBooked(true)}
+            onClick={() => setModalOpen(true)}
             className="mt-4 w-full rounded-xl border border-brand-500/40 bg-brand-500/10 px-4 py-3 text-sm font-semibold text-brand-200 transition hover:bg-brand-500/20"
           >
             Checkout {cart.size} fix{cart.size > 1 ? "es" : ""} · {money(cartTotal, isIndia)}
@@ -240,6 +240,8 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
 
         <p className="mt-4 text-[11px] text-white/30">{offer.disclaimer}</p>
       </div>
+
+      <ContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }

@@ -24,9 +24,17 @@ export function ContactModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
   useEffect(() => {
     if (!isOpen) return;
+    
+    // Lock body scroll
+    document.body.style.overflow = "hidden";
+    
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -53,7 +61,7 @@ export function ContactModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className="relative w-full max-w-xl bg-ink-900 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 relative overflow-hidden animate-fade-up"
+        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-ink-900 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 animate-fade-up"
         onClick={(e) => e.stopPropagation()}
         style={{ animationDuration: "0.4s" }}
       >

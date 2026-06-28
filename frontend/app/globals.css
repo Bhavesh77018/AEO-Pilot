@@ -54,6 +54,14 @@ body {
   .glass {
     @apply border border-white/10 bg-white/[0.03] backdrop-blur-xl;
   }
+  /* Hide scrollbar for clean UI */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Respect users who prefer reduced motion */

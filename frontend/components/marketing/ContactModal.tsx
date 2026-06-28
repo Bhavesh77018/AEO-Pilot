@@ -61,7 +61,7 @@ export function ContactModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       style={{ animationDuration: "0.2s" }}
     >
       <div
-        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-ink-900 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 animate-fade-up"
+        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto scrollbar-hide bg-ink-900 border border-white/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] p-8 sm:p-10 animate-fade-up"
         onClick={(e) => e.stopPropagation()}
         style={{ animationDuration: "0.4s" }}
       >

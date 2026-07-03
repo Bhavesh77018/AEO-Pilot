@@ -12,7 +12,7 @@ def test_low_score_gets_flagship_tier():
     recs = [_rec("Add Organization JSON-LD", "high", 18)]
     offer = build_offer(11.4, {}, recs)
     assert offer["recommended_package"]["tier"] == "overhaul"
-    assert offer["recommended_package"]["price_one_time"] == 12000
+    assert offer["recommended_package"]["price_one_time"] == 1999
 
 
 def test_mid_score_gets_builder_tier():

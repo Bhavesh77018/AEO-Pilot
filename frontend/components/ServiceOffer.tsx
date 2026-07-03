@@ -46,7 +46,7 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
       return next;
     });
 
-  const cartTotal = useMemo(
+  const cartTotalRaw = useMemo(
     () =>
       offer.a_la_carte
         .filter((i) => cart.has(i.title))
@@ -58,8 +58,46 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
   const cur = pkg.current_score;
   const proj = pkg.projected_score;
 
+  const isLaunchMonth = true;
+  const discountRate = 0.2; // 20% off
+  const applyDiscount = (price: number) => isLaunchMonth ? price * (1 - discountRate) : price;
+  const cartTotal = applyDiscount(cartTotalRaw);
+
+  if (cur >= 80) {
+    return (
+      <div className="card overflow-hidden p-0 text-center">
+        <div className="relative border-b border-white/10 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent p-10">
+          <div className="mx-auto max-w-lg">
+            <span className="text-[12px] font-semibold uppercase tracking-wider text-emerald-400">
+              Excellent AEO Score
+            </span>
+            <h3 className="mt-3 text-3xl font-bold text-white">Good to have this!</h3>
+            <p className="mt-4 text-base leading-relaxed text-white/70">
+              Your website is doing great. Just keep this continue. Grab the regular scan package and scan regularly to maintain your AI visibility.
+            </p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="mt-8 rounded-xl bg-emerald-500 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400"
+            >
+              Grab Regular Scan Package
+            </button>
+            <p className="mt-3 text-[11px] text-white/40">
+              Continuous monitoring · Monthly reporting
+            </p>
+          </div>
+        </div>
+        <ContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="card overflow-hidden p-0">
+      {isLaunchMonth && (
+        <div className="bg-gradient-to-r from-brand-600 to-brand-400 px-4 py-2 text-center text-[11px] font-bold uppercase tracking-widest text-white">
+          🎉 Launch Month Special: Get 20% off all packages & fixes!
+        </div>
+      )}
       {/* Header band */}
       <div className="relative border-b border-white/10 bg-gradient-to-br from-brand-500/20 via-brand-500/5 to-transparent p-6">
         <div className="flex items-start justify-between gap-4">
@@ -128,9 +166,14 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
           <div className="rounded-2xl border border-brand-500/30 bg-ink-900/60 p-5">
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-bold text-white">
-                {money(pkg.price_one_time, isIndia)}
+                {money(applyDiscount(pkg.price_one_time), isIndia)}
               </span>
-              <span className="text-sm text-white/40">one-time</span>
+              {isLaunchMonth && (
+                <span className="text-sm text-white/40 line-through ml-1">
+                  {money(pkg.price_one_time, isIndia)}
+                </span>
+              )}
+              <span className="text-sm text-white/40 ml-1">one-time</span>
             </div>
             <div className="mt-1 text-sm text-white/60">
               + {money(pkg.price_monthly, isIndia)}
@@ -183,9 +226,16 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="text-sm font-semibold tabular-nums text-white">
-                    {money(item.price, isIndia)}
-                  </span>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold tabular-nums text-white">
+                      {money(applyDiscount(item.price), isIndia)}
+                    </div>
+                    {isLaunchMonth && (
+                      <div className="text-[10px] text-white/40 line-through">
+                        {money(item.price, isIndia)}
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={() => toggle(item.title)}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
@@ -227,8 +277,15 @@ export function ServiceOffer({ offer }: { offer: Offer }) {
                 }`}
               >
                 <div className="text-xs font-semibold text-white/80">{t.name}</div>
-                <div className="mt-1 text-sm font-bold text-white">
-                  {money(t.price_one_time, isIndia)}
+                <div className="mt-1 flex items-baseline gap-1">
+                  <span className="text-sm font-bold text-white">
+                    {money(applyDiscount(t.price_one_time), isIndia)}
+                  </span>
+                  {isLaunchMonth && (
+                    <span className="text-[10px] text-white/40 line-through">
+                      {money(t.price_one_time, isIndia)}
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-white/40">
                   +{money(t.price_monthly, isIndia)}/mo · {t.timeline_weeks}w

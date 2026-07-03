@@ -16,43 +16,32 @@ CURRENCY = "USD"
 # Tier catalog, most → least intensive. Chosen by current AEO score.
 _TIERS = [
     {
-        "key": "overhaul", "name": "Full AEO Authority Overhaul",
+        "key": "overhaul", "name": "Complete Website Correction & AI Optimization",
         "badge": "Flagship", "max_score": 35,
-        "price_one_time": 2500, "price_monthly": 500, "timeline_weeks": 10,
-        "summary": "Top-to-bottom rebuild of how AI engines see your brand: "
-                   "schema, entity graph, knowledge hub, FAQ corpus, and a "
-                   "citation-building campaign — fully implemented by our team.",
-        "guarantee": "Measurable AI-visibility lift in 90 days or we work free "
-                     "until you get it.",
+        "price_one_time": 1999, "price_monthly": 399, "timeline_weeks": 8,
+        "summary": "A full website overhaul to make your content correctly readable by answer engines. We fix all structural errors, build proper schema, and optimize your entire entity graph.",
+        "guarantee": "Significant improvement in AI readability and scan score within 60 days.",
     },
     {
-        "key": "builder", "name": "AEO Authority Builder",
+        "key": "builder", "name": "Targeted Correction & Enhancement",
         "badge": "Most popular", "max_score": 60,
-        "price_one_time": 1500, "price_monthly": 300, "timeline_weeks": 6,
-        "summary": "We close your biggest answer-engine gaps — schema coverage, "
-                   "entity strength, and a high-intent FAQ + comparison library "
-                   "that LLMs love to cite.",
-        "guarantee": "Targeted score lift across your three weakest categories, "
-                     "or a free additional sprint.",
+        "price_one_time": 999, "price_monthly": 199, "timeline_weeks": 4,
+        "summary": "We fix the critical errors holding back your website. Includes schema correction, targeted entity strengthening, and resolving high-severity visibility issues.",
+        "guarantee": "Targeted score lift across your weakest categories within 30 days.",
     },
     {
-        "key": "accelerator", "name": "AI Visibility Accelerator",
+        "key": "accelerator", "name": "Visibility Tune-Up",
         "badge": "Best value", "max_score": 80,
-        "price_one_time": 800, "price_monthly": 200, "timeline_weeks": 4,
-        "summary": "You're already AI-readable — we push you to the top of the "
-                   "answer. Citation outreach, entity reinforcement, and "
-                   "continuous prompt monitoring.",
-        "guarantee": "Improved mention rate on your tracked prompts in 60 days.",
+        "price_one_time": 499, "price_monthly": 99, "timeline_weeks": 2,
+        "summary": "Your site is mostly correct, but needs a tune-up to ensure continuous AI visibility. We resolve remaining warnings and reinforce your digital presence.",
+        "guarantee": "Improved indexing and answer engine mentions in 30 days.",
     },
     {
-        "key": "maintenance", "name": "Authority Maintenance & Monitoring",
+        "key": "maintenance", "name": "Regular Scan & Monitoring",
         "badge": "Retainer", "max_score": 101,
-        "price_one_time": 300, "price_monthly": 150, "timeline_weeks": 2,
-        "summary": "Defend your lead. Ongoing AI-visibility tracking, competitor "
-                   "watch, and monthly content refreshes so you stay the cited "
-                   "answer as models update.",
-        "guarantee": "Visibility never silently slips — alerts the moment a "
-                     "tracked answer drops you.",
+        "price_one_time": 199, "price_monthly": 49, "timeline_weeks": 1,
+        "summary": "Continuous monitoring and regular scans to ensure your website remains correctly optimized as AI models evolve.",
+        "guarantee": "Immediate alerts if your visibility drops or new errors are detected.",
     },
 ]
 
@@ -129,12 +118,9 @@ def build_offer(overall_score: float | None, category_scores: dict | None,
     ]
 
     return {
-        "headline": "Don't have time to fix this? We'll do it for you.",
-        "subhead": "AEO Pilot's experts implement every fix, publish AI-readable "
-                   "content, and build the entity authority that gets your brand "
-                   "cited across ChatGPT, Gemini, Claude, and Perplexity.",
-        "risk": "Every month you wait, competitors capture the AI answers your "
-                "buyers see — and that compounds.",
+        "headline": "Need help making your website AI-ready?",
+        "subhead": "Our experts can correct structural errors, build proper schema, and optimize your entity graph to ensure AI models read and cite your brand correctly.",
+        "risk": "Unresolved errors prevent answer engines from trusting and citing your website in their responses.",
         "recommended_package": recommended,
         "all_packages": all_packages,
         "a_la_carte": a_la_carte,

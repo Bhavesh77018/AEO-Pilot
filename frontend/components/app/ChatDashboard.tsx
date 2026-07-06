@@ -529,7 +529,7 @@ export function ChatDashboard({
 
       <div className="flex h-full flex-col">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-5 px-6 py-6">
+        <div className="flex-1 overflow-y-auto space-y-4 md:space-y-5 px-3 py-4 md:px-6 md:py-6">
           {isLoading && messages.length === 0 && (
             <div className="flex items-center gap-3">
               <LogoMark size={28} className="rounded-lg" />
@@ -547,24 +547,24 @@ export function ChatDashboard({
               style={{ animationDuration: "0.25s" }}
             >
               {msg.role === "assistant" ? (
-                <div className="flex max-w-2xl gap-3 w-full">
-                  <LogoMark size={28} className="mt-1 shrink-0 rounded-lg shadow-lg" />
-                  <div className="min-w-0 flex-1 space-y-3">
+                <div className="flex max-w-2xl gap-2 md:gap-3 w-full">
+                  <LogoMark size={24} className="mt-1 shrink-0 rounded-lg shadow-lg md:w-7 md:h-7" />
+                  <div className="min-w-0 flex-1 space-y-2 md:space-y-3">
                     {/* Welcome */}
                     {msg.type === "welcome" && (
-                      <div className="rounded-2xl border border-brand-500/25 bg-gradient-to-b from-brand-500/10 to-transparent p-5">
+                      <div className="rounded-2xl border border-brand-500/25 bg-gradient-to-b from-brand-500/10 to-transparent p-3.5 md:p-5">
                         {renderMarkdown(msg.content)}
                       </div>
                     )}
 
                     {/* Quick actions */}
                     {msg.type === "quick-actions" && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 md:gap-2">
                         {QUICK_ACTIONS.map((a) => (
                           <button
                             key={a.label}
                             onClick={() => handleQuickAction(a.value)}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 transition hover:border-brand-500/40 hover:bg-white/10 hover:text-white"
+                            className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 md:px-3 text-[11px] md:text-xs font-medium text-white/70 transition hover:border-brand-500/40 hover:bg-white/10 hover:text-white active:scale-95"
                           >
                             {a.label}
                           </button>
@@ -577,7 +577,7 @@ export function ChatDashboard({
                       <div className="relative w-full max-w-md">
                         <button
                           onClick={() => handleProjectClick(msg.project!)}
-                          className="group w-full rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-brand-500/40 hover:bg-white/[0.06]"
+                          className="group w-full rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 md:p-5 text-left transition hover:border-brand-500/40 hover:bg-white/[0.06] active:scale-[0.99]"
                         >
                           <div className="flex items-start justify-between gap-3 pr-6">
                             <div className="min-w-0">
@@ -654,7 +654,7 @@ export function ChatDashboard({
 
                     {/* Regular text */}
                     {(msg.type === "text" || msg.type === "project-list") && (
-                      <div className="max-w-2xl rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                      <div className="max-w-2xl rounded-2xl border border-white/8 bg-white/[0.03] p-3 md:p-4">
                         {renderMarkdown(msg.content)}
                       </div>
                     )}
@@ -672,7 +672,7 @@ export function ChatDashboard({
                 </div>
               ) : (
                 /* User bubble */
-                <div className="max-w-sm rounded-2xl bg-brand-600 px-4 py-3">
+                <div className="max-w-[80vw] md:max-w-sm rounded-2xl bg-brand-600 px-3.5 py-2.5 md:px-4 md:py-3">
                   <p className="text-sm text-white">{msg.content}</p>
                 </div>
               )}
@@ -682,8 +682,8 @@ export function ChatDashboard({
           {/* Typing indicator */}
           {(isTyping || createProject.isPending || startScan.isPending) && (
             <div className="flex justify-start">
-              <div className="flex max-w-2xl gap-3">
-                <LogoMark size={28} className="mt-1 shrink-0 rounded-lg" />
+              <div className="flex max-w-2xl gap-2 md:gap-3">
+                <LogoMark size={24} className="mt-1 shrink-0 rounded-lg" />
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
                   {createProject.isPending || startScan.isPending ? (
                     <div className="flex items-center gap-2.5">
@@ -714,10 +714,10 @@ export function ChatDashboard({
         </div>
 
         {/* Input */}
-        <div className="border-t border-white/8 bg-ink-900/60 backdrop-blur p-5">
+        <div className="border-t border-white/8 bg-ink-900/60 backdrop-blur p-3 md:p-5 pb-safe">
           <form
             onSubmit={handleSend}
-            className="mx-auto flex max-w-2xl gap-3"
+            className="mx-auto flex max-w-2xl gap-2 md:gap-3"
           >
             <div className="relative flex-1">
               <input
@@ -727,13 +727,13 @@ export function ChatDashboard({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
                   !userEmail
-                    ? "Type a domain like stripe.com, or ask me anything…"
+                    ? "Type a domain or ask anything…"
                     : projects.length >= projectLimit
                       ? "Upgrade to add more projects…"
-                      : "Type a domain like stripe.com, or ask me anything…"
+                      : "Type a domain or ask anything…"
                 }
                 disabled={isTyping || createProject.isPending}
-                className="w-full rounded-xl border border-white/10 bg-ink-900/80 px-4 py-3 pr-10 text-sm text-white placeholder-white/25 transition focus:border-brand-500/50 focus:outline-none focus:ring-1 focus:ring-brand-500/20 disabled:opacity-50"
+                className="w-full rounded-xl border border-white/10 bg-ink-900/80 px-4 py-3 text-sm text-white placeholder-white/25 transition focus:border-brand-500/50 focus:outline-none focus:ring-1 focus:ring-brand-500/20 disabled:opacity-50"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -745,7 +745,7 @@ export function ChatDashboard({
             <button
               type="submit"
               disabled={!input.trim() || isTyping || createProject.isPending}
-              className="rounded-xl bg-brand-600 px-4 py-3 font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-500 disabled:opacity-40 flex items-center gap-2"
+              className="h-12 w-12 shrink-0 rounded-xl bg-brand-600 font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-500 disabled:opacity-40 flex items-center justify-center active:scale-95"
             >
               {isTyping || createProject.isPending ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -757,7 +757,7 @@ export function ChatDashboard({
 
           <div className="mx-auto mt-2 max-w-2xl flex items-center justify-between">
             {!userEmail ? (
-              <p className="text-xs text-white/35">
+              <p className="hidden sm:block text-xs text-white/35">
                 💡{" "}
                 <a href="/login" className="underline hover:text-white/60">
                   Sign in
@@ -769,11 +769,11 @@ export function ChatDashboard({
                 onClick={() => openUpgrade("project_limit")}
                 className="text-xs text-amber-400 hover:text-amber-300 transition"
               >
-                📊 {planName} plan · {projectLimit} project limit ·{" "}
+                📊 {planName} · {projectLimit} project limit ·{" "}
                 <span className="underline">Upgrade →</span>
               </button>
             ) : (
-              <p className="text-xs text-white/25">
+              <p className="hidden sm:block text-xs text-white/25">
                 Press Enter to send · {planName} plan · {projects.length}/{projectLimit} projects
               </p>
             )}

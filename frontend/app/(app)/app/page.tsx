@@ -35,15 +35,49 @@ function scoreColor(s: number) {
   return "text-red-400";
 }
 
+/* ── Hamburger icon ──────────────────────────────────────────────── */
+function HamburgerIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+      <line x1="3" y1="5" x2="17" y2="5" />
+      <line x1="3" y1="10" x2="17" y2="10" />
+      <line x1="3" y1="15" x2="17" y2="15" />
+    </svg>
+  );
+}
+
+function CloseIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+      <line x1="4" y1="4" x2="16" y2="16" />
+      <line x1="16" y1="4" x2="4" y2="16" />
+    </svg>
+  );
+}
+
 function AppPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialDomain = searchParams.get("domain") ?? undefined;
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // default closed; desktop overrides via CSS
+  const [isMobile, setIsMobile] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const qc = useQueryClient();
+
+  /* detect mobile */
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      setIsMobile(mq.matches);
+      // On desktop, start with sidebar open; on mobile start closed
+      if (!mq.matches) setSidebarOpen(true);
+    };
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   /* auth */
   useEffect(() => {
@@ -97,6 +131,7 @@ function AppPageInner() {
 
   const handleProjectClick = (project: Project) => {
     setActiveProjectId(project.id);
+    if (isMobile) setSidebarOpen(false); // close drawer on mobile nav
     if (project.latest_scan_id) {
       router.push(`/scans/${project.latest_scan_id}`);
     }
@@ -106,26 +141,42 @@ function AppPageInner() {
     if (projectList.length >= projectLimit) {
       setUpgradeOpen(true);
     }
-    // If within limit, the chat input handles it naturally
+    if (isMobile) setSidebarOpen(false);
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
-    <div className="flex h-screen overflow-hidden bg-ink-900">
-      {/* ── Sidebar ───────────────────────────────────────────────── */}
+    <div className="flex h-[100dvh] overflow-hidden bg-ink-900">
+
+      {/* ── Mobile overlay backdrop ─────────────────────────────────── */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Sidebar ─────────────────────────────────────────────────── */}
       <aside
-        className={`flex flex-col border-r border-white/10 bg-ink-950 transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-[72px]"
-        }`}
+        className={`
+          flex flex-col border-r border-white/10 bg-ink-950 transition-all duration-300
+          ${isMobile
+            ? `fixed inset-y-0 left-0 z-40 w-72 shadow-2xl shadow-black/50 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`
+            : sidebarOpen ? "w-64" : "w-[72px]"
+          }
+        `}
       >
-        {/* Logo + collapse */}
+        {/* Logo + collapse / close */}
         <div className="flex items-center justify-between border-b border-white/10 p-4">
           <button
-            onClick={() => setSidebarOpen((o) => !o)}
+            onClick={() => isMobile ? closeSidebar() : setSidebarOpen((o) => !o)}
             className="flex items-center gap-2.5 rounded-lg p-1 transition hover:bg-white/5"
             title={sidebarOpen ? "Collapse sidebar (⌘B)" : "Expand sidebar (⌘B)"}
           >
             <LogoMark size={32} className="shrink-0 rounded-[8px] shadow-lg shadow-brand-600/20" />
-            {sidebarOpen && (
+            {(sidebarOpen) && (
               <div className="text-left">
                 <div className="text-sm font-semibold text-white leading-tight">AEO Pilot</div>
                 <div
@@ -138,6 +189,17 @@ function AppPageInner() {
               </div>
             )}
           </button>
+
+          {/* Close button visible on mobile */}
+          {isMobile && sidebarOpen && (
+            <button
+              onClick={closeSidebar}
+              className="grid h-8 w-8 place-items-center rounded-lg text-white/40 hover:bg-white/5 hover:text-white transition"
+              aria-label="Close sidebar"
+            >
+              <CloseIcon size={18} />
+            </button>
+          )}
         </div>
 
         {/* New scan / project */}
@@ -311,23 +373,40 @@ function AppPageInner() {
         </div>
       </aside>
 
-      {/* ── Main ──────────────────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col overflow-hidden">
+      {/* ── Main ────────────────────────────────────────────────────── */}
+      <main className="flex flex-1 flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-white/10 bg-ink-900/60 px-6 py-4 backdrop-blur">
-          <div>
-            <h1 className="text-xl font-bold text-white">How can I help you today?</h1>
-            <p className="text-xs text-white/40">
+        <header className="flex items-center gap-3 border-b border-white/10 bg-ink-900/60 px-4 py-3 md:px-6 md:py-4 backdrop-blur">
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white/60 hover:bg-white/5 hover:text-white transition md:hidden"
+            aria-label="Open sidebar"
+          >
+            <HamburgerIcon size={20} />
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-bold text-white md:text-xl truncate">
+              How can I help you today?
+            </h1>
+            <p className="hidden md:block text-xs text-white/40">
               {userEmail
                 ? `Rank your brand in AI + Google · ${planName} plan · ${projectList.length}/${projectLimit} projects`
                 : "Sign in to start ranking your brand in AI + Google"}
             </p>
+            {/* Mobile subtitle — shorter */}
+            <p className="md:hidden text-[11px] text-white/35 truncate">
+              {userEmail
+                ? `${planName} plan · ${projectList.length}/${projectLimit} projects`
+                : "Sign in to get started"}
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Plan badge */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Plan badge — desktop only */}
             <span
-              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+              className={`hidden md:inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                 PLAN_COLORS[planKey] ?? PLAN_COLORS.starter
               }`}
             >
@@ -370,7 +449,7 @@ function AppPageInner() {
 
 export default function AppPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-ink-900 text-white/40 text-sm">Loading…</div>}>
+    <Suspense fallback={<div className="flex h-[100dvh] items-center justify-center bg-ink-900 text-white/40 text-sm">Loading…</div>}>
       <AppPageInner />
     </Suspense>
   );

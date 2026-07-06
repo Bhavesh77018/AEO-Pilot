@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: dark;
+  /* Safe area insets for iPhone home bar */
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 body {
@@ -53,6 +55,10 @@ body {
   }
   .glass {
     @apply border border-white/10 bg-white/[0.03] backdrop-blur-xl;
+  }
+  /* Safe area bottom padding (iPhone notch / home bar) */
+  .pb-safe {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
   /* Hide scrollbar for clean UI */
   .scrollbar-hide::-webkit-scrollbar {

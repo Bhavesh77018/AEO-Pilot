@@ -394,12 +394,6 @@ export function ChatDashboard({
     const text = (overrideText ?? input).trim();
     if (!text) return;
 
-    if (!userEmail) {
-      const domain = extractDomain(text) || cleanDomain(text) || text;
-      router.push(`/login?next=${encodeURIComponent(`/app?domain=${domain}`)}`);
-      return;
-    }
-
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: "user",

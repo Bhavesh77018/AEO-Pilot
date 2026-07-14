@@ -64,8 +64,8 @@ def create_project(
     if (err := rate_limit(request, "project_create")):
         return err
 
-    if settings.auth_enabled and not user:
-        raise HTTPException(401, "Sign in to create a project")
+    # We allow anonymous project creation for PLG flow.
+    # The rate limit above (5 per IP) protects against abuse.
     raw = body.domain.strip().rstrip("/")
     host = raw.replace("https://", "").replace("http://", "").split("/")[0]
     if host.startswith("www."):

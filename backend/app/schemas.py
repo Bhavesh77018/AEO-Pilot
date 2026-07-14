@@ -2,21 +2,41 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ── Projects ──────────────────────────────────────────────────────────
 class ProjectCreate(BaseModel):
-    name: str | None = Field(default=None, description="Display name; defaults to the domain")
-    domain: str = Field(description="Bare domain or URL, e.g. stripe.com")
+    name: str | None = Field(default=None, max_length=120, description="Display name; defaults to the domain")
+    domain: str = Field(min_length=3, max_length=253, description="Bare domain or URL, e.g. stripe.com")
+
+    @field_validator("domain")
+    @classmethod
+    def domain_safe_chars(cls, v: str) -> str:
+        import re
+        # Strip protocol/path so we can validate the bare host.
+        bare = v.strip().lower()
+        bare = re.sub(r'^https?://', '', bare).split('/')[0].split(':')[0]
+        if not re.fullmatch(r'[a-z0-9][a-z0-9\-\.]{0,251}[a-z0-9]', bare) and bare not in ('localhost',):
+            raise ValueError('Domain contains invalid characters')
+        return v
+
 
 class ContactCreate(BaseModel):
-    name: str
-    email: str
-    phone: str | None = None
-    domain: str | None = None
-    message: str | None = None
+    name: str = Field(min_length=1, max_length=120)
+    email: str = Field(min_length=5, max_length=254)
+    phone: str | None = Field(default=None, max_length=30)
+    domain: str | None = Field(default=None, max_length=253)
+    message: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("email")
+    @classmethod
+    def email_basic_check(cls, v: str) -> str:
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email address")
+        return v.lower().strip()
 
 
 class ProjectOut(BaseModel):
@@ -136,10 +156,24 @@ class BillingConfig(BaseModel):
     currency: str = "INR"
 
 
+# Allowlisted values only — the server determines the price; the client
+# sends only the plan/period they want. Any other value is rejected at the
+# schema layer before the billing code ever runs.
 class OrderCreate(BaseModel):
-    plan: str
-    period: str = "monthly"
-    email: str | None = None
+    plan: Literal["growth", "agency"] = Field(
+        description="Paid plan identifier. 'starter' and 'enterprise' do not go through checkout."
+    )
+    period: Literal["monthly", "annual"] = "monthly"
+    email: str | None = Field(default=None, max_length=254)
+
+    @field_validator("email")
+    @classmethod
+    def email_basic_check(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email address")
+        return v.lower().strip()
 
 
 class OrderOut(BaseModel):

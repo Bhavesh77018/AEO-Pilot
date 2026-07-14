@@ -215,12 +215,19 @@ export function ChatDashboard({
     useState<"project_limit" | "scan_limit" | "monitoring">("project_limit");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Holds the scan ID returned by the backend (arrives quickly via 202).
+  // Navigation fires when ScanProgress.onComplete is called (after 100% animation).
+  const pendingScanId = useRef<string | null>(null);
+  const isNavigating = useRef(false);
 
   /* mutations */
   const createProject = useMutation({
     mutationFn: (domain: string) => api.createProject(domain),
     onSuccess: (project) => {
       qc.invalidateQueries({ queryKey: ["projects", userEmail] });
+      // Reset navigation state for this new scan session.
+      pendingScanId.current = null;
+      isNavigating.current = false;
       // Immediately kick off a scan — show premium progress UI
       setScanningDomain(project.domain);
       setMessages((prev) => [
@@ -252,10 +259,9 @@ export function ChatDashboard({
   const startScan = useMutation({
     mutationFn: (projectId: string) => api.startScan(projectId),
     onSuccess: (scan) => {
-      // Give ScanProgress time to animate before navigating
-      setTimeout(() => {
-        router.push(`/scans/${scan.id}`);
-      }, 800);
+      // Store the scan ID — navigation fires later when the animation reaches 100%.
+      // DO NOT navigate here; ScanProgress.onComplete handles it.
+      pendingScanId.current = scan.id;
     },
     onError: (e) => {
       setScanningDomain(null);
@@ -664,7 +670,30 @@ export function ChatDashboard({
                       <ScanProgress
                         domain={msg.scanDomain}
                         onComplete={() => {
-                          // Navigation handled by startScan.onSuccess with a delay
+                          // Guard against double navigation.
+                          if (isNavigating.current) return;
+
+                          if (pendingScanId.current) {
+                            // Normal case: backend already returned the scan ID.
+                            isNavigating.current = true;
+                            router.push(`/scans/${pendingScanId.current}`);
+                            return;
+                          }
+
+                          // Edge case: backend is very slow. Poll for up to 10s.
+                          const start = Date.now();
+                          const poll = setInterval(() => {
+                            if (pendingScanId.current) {
+                              clearInterval(poll);
+                              isNavigating.current = true;
+                              router.push(`/scans/${pendingScanId.current}`);
+                            } else if (Date.now() - start > 10000) {
+                              // Fallback: go to projects list if we never get the ID.
+                              clearInterval(poll);
+                              isNavigating.current = true;
+                              router.push("/app");
+                            }
+                          }, 300);
                         }}
                       />
                     )}

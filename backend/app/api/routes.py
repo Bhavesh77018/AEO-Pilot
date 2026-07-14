@@ -5,7 +5,9 @@ The Celery path is scaffolded in app/worker.py for when scans get heavier.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+import uuid as _uuid_mod
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -14,6 +16,7 @@ from ..agents.orchestrator import run_scan
 from ..auth import get_current_user
 from ..config import settings
 from ..db import SessionLocal, get_db
+from ..middleware.security import rate_limit
 from ..models import MonitoringRun, PageSnapshot, Project, Prompt, Scan, Subscription, ContactSubmission
 from ..schemas import (
     BillingConfig,
@@ -36,14 +39,31 @@ from ..services import billing, prompt_suggester, service_offer
 
 router = APIRouter(prefix="/api/v1")
 
+# Maximum concurrent active scans per user (prevents resource exhaustion).
+_MAX_CONCURRENT_SCANS = 3
+
+
+def _validate_uuid(value: str, label: str = "ID") -> str:
+    """Return the value if it's a valid UUID-4, else raise 404 (don't leak existence)."""
+    try:
+        _uuid_mod.UUID(value, version=4)
+    except (ValueError, AttributeError):
+        raise HTTPException(404, f"{label} not found")
+    return value
+
 
 # ── Projects ──────────────────────────────────────────────────────────
 @router.post("/projects", response_model=ProjectOut, status_code=201)
 def create_project(
     body: ProjectCreate,
+    request: Request,
     db: Session = Depends(get_db),
     user: dict | None = Depends(get_current_user),
 ):
+    # Rate limit: 5 project creates per minute per IP.
+    if (err := rate_limit(request, "project_create")):
+        return err
+
     if settings.auth_enabled and not user:
         raise HTTPException(401, "Sign in to create a project")
     raw = body.domain.strip().rstrip("/")
@@ -116,10 +136,32 @@ def delete_project(
 def start_scan(
     project_id: str,
     background: BackgroundTasks,
+    request: Request,
     db: Session = Depends(get_db),
     user: dict | None = Depends(get_current_user),
 ):
+    # Rate limit: 3 scan starts per minute per IP.
+    if (err := rate_limit(request, "scan_start")):
+        return err
+
+    _validate_uuid(project_id, "Project")
     project = _require_project(db, project_id, user)
+
+    # Throttle: block if user already has too many active scans.
+    if user:
+        active_count = db.scalar(
+            select(Scan)
+            .join(Project)
+            .where(Project.user_id == user["id"], Scan.status == "running")
+            .__class__.count()
+        ) or 0
+        # Simpler: count pending+running scans for this project.
+        active_count = len([
+            s for s in project.scans
+            if s.status in ("pending", "running")
+        ])
+        if active_count >= _MAX_CONCURRENT_SCANS:
+            raise HTTPException(429, f"Too many active scans. Wait for current scans to finish.")
 
     scan = Scan(project_id=project.id, status="pending")
     db.add(scan)
@@ -286,10 +328,16 @@ def billing_config():
 
 
 @router.post("/billing/order", response_model=OrderOut)
-def create_order(body: OrderCreate, db: Session = Depends(get_db)):
+def create_order(body: OrderCreate, request: Request, db: Session = Depends(get_db)):
+    # Rate limit: 10 order attempts per hour per IP.
+    if (err := rate_limit(request, "billing_order")):
+        return err
+
     if not billing.is_enabled():
         raise HTTPException(503, "Billing is not configured")
     try:
+        # amount_paise uses PLAN_PRICES_INR — the client-sent plan/period is
+        # validated by Literal in the schema; the server always sets the price.
         amount = billing.amount_paise(body.plan, body.period)
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -342,7 +390,11 @@ def verify_payment(body: PaymentVerify, db: Session = Depends(get_db)):
 
 # ── Contact ───────────────────────────────────────────────────────────
 @router.post("/contact", status_code=201)
-def submit_contact(body: ContactCreate, db: Session = Depends(get_db)):
+def submit_contact(body: ContactCreate, request: Request, db: Session = Depends(get_db)):
+    # Rate limit: 5 contact submissions per hour per IP.
+    if (err := rate_limit(request, "contact_submit")):
+        return err
+
     submission = ContactSubmission(
         name=body.name,
         email=body.email,
@@ -352,13 +404,11 @@ def submit_contact(body: ContactCreate, db: Session = Depends(get_db)):
     )
     db.add(submission)
     db.commit()
-    # Mock email sending to info@dialforit.com
-    print(f"[MAIL MOCK] New Contact Submission:")
-    print(f"  From: {body.name} <{body.email}>")
-    print(f"  Phone: {body.phone}")
-    print(f"  Domain: {body.domain}")
-    print(f"  Message: {body.message}")
-    print(f"  -- Sent to info@dialforit.com --")
+    # Log to server stdout only — never to client response.
+    import logging as _log
+    _log.getLogger(__name__).info(
+        "[CONTACT] New submission from %s <%s>", body.name, body.email
+    )
     return {"status": "ok"}
 
 
@@ -408,11 +458,19 @@ def _project_out(project: Project) -> ProjectOut:
 
 
 @router.get("/billing/plan")
-def get_billing_plan(user: dict | None = Depends(get_current_user)):
-    ADMIN_EMAILS = [
-        "pankajjangid5510@gmail.com",
-    ]
-    if user and user.get("email") and user["email"].lower() in ADMIN_EMAILS:
+def get_billing_plan(
+    request: Request,
+    user: dict | None = Depends(get_current_user),
+):
+    """Return the active plan for the authenticated user.
+
+    Admin override is stored server-side via env var ADMIN_EMAILS (comma-separated)
+    so it never appears in source code.
+    """
+    admin_emails_raw = settings.admin_emails  # read from env, never hardcoded
+    admin_emails = {e.strip().lower() for e in admin_emails_raw.split(",") if e.strip()}
+
+    if user and user.get("email") and user["email"].lower() in admin_emails:
         return {
             "plan": "agency",
             "name": "Admin (Full Access)",

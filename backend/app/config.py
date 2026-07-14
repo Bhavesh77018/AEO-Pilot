@@ -85,6 +85,14 @@ class Settings(BaseSettings):
     crawl_timeout_seconds: int = 10
     user_agent: str = "AEOPilotBot/0.1 (+https://aeopilot.example/bot)"
 
+    # Admin emails — comma-separated list of emails that receive full-access plan.
+    # Stored in env so they never appear in source code.
+    # Example: ADMIN_EMAILS=alice@example.com,bob@example.com
+    admin_emails: str = ""
+
+    # Security: set to False in test environments to bypass in-process rate limiting.
+    rate_limit_enabled: bool = True
+
 
 @lru_cache
 def get_settings() -> Settings:

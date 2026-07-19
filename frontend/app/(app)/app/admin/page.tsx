@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoMark } from "@/components/Logo";
 import { QueryFeed } from "@/components/app/QueryFeed";
+import { UserAdminRowActions } from "@/components/app/UserAdminRowActions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -129,14 +130,22 @@ export default async function AdminPage() {
                 <th className="px-4 py-3 font-medium">Role</th>
                 <th className="px-4 py-3 font-medium text-right">Queries</th>
                 <th className="px-4 py-3 font-medium">Joined</th>
+                <th className="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-white/[0.02]">
-                  <td className="px-4 py-3 text-white/85">{u.email}</td>
+                  <td className="px-4 py-3 text-white/85">
+                    {u.email}
+                    {u.plan !== "free" && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-emerald-400 uppercase ring-1 ring-inset ring-emerald-500/20">
+                        Premium
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60">
+                    <span className={`rounded-md px-2 py-0.5 text-xs ${u.plan !== "free" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-white/60"}`}>
                       {u.plan}
                     </span>
                   </td>
@@ -154,6 +163,9 @@ export default async function AdminPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-white/40">
                     {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <UserAdminRowActions user={u} />
                   </td>
                 </tr>
               ))}
@@ -208,7 +220,7 @@ export default async function AdminPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-white/25">
-          Read-only admin · powered by Supabase RLS
+          Manage users and interactions · powered by Supabase RLS
         </p>
       </div>
     </div>

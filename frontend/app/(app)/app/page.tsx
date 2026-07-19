@@ -316,7 +316,14 @@ function AppPageInner() {
               )}
               <AdminNavLink />
               {userEmail && (
-                <div className="truncate px-2 py-1 text-[11px] text-white/40">{userEmail}</div>
+                <div className="flex items-center gap-1.5 px-2 py-1">
+                  <div className="truncate text-[11px] text-white/40">{userEmail}</div>
+                  {planKey !== "starter" && (
+                    <div className="rounded bg-emerald-500/20 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-400" title="Premium Member">
+                      PRO
+                    </div>
+                  )}
+                </div>
               )}
               {userEmail ? (
                 <button
@@ -415,10 +422,17 @@ function AppPageInner() {
 
             {/* User avatar */}
             {userEmail && (
-              <Link href="/login">
+              <Link href="/login" className="relative">
                 <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-500/20 text-xs font-bold text-brand-300 ring-2 ring-brand-500/20 transition hover:ring-brand-500/40">
                   {userEmail[0].toUpperCase()}
                 </div>
+                {planKey !== "starter" && (
+                   <div className="absolute -bottom-1 -right-1 rounded-full bg-emerald-500 ring-2 ring-ink-900 grid place-items-center p-0.5 shadow-sm" title="Premium Member">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                      </svg>
+                   </div>
+                )}
               </Link>
             )}
           </div>

@@ -72,14 +72,16 @@ export function Pricing() {
                   ) : (
                     <>
                       <span className="text-3xl font-black text-white">
-                        ₹{price.toLocaleString("en-IN")}
+                        ₹{(annual ? price * 12 : price).toLocaleString("en-IN")}
                       </span>
-                      <span className="text-sm text-white/40">/mo</span>
+                      <span className="text-sm text-white/40">{annual ? "/yr" : "/mo"}</span>
                     </>
                   )}
                 </div>
-                {annual && isPaid && (
-                  <div className="mt-0.5 text-[11px] text-emerald-400">billed annually</div>
+                {annual && isPaid && plan.monthly && (
+                  <div className="mt-0.5 text-[11px] text-emerald-400">
+                    ₹{price.toLocaleString("en-IN")}/mo (Save {Math.round((1 - price / plan.monthly) * 100)}%)
+                  </div>
                 )}
 
                 {/* CTA: paid plans → Razorpay checkout; free/custom → link */}

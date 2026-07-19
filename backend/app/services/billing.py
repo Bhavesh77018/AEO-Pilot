@@ -32,6 +32,9 @@ def amount_paise(plan: str, period: str) -> int:
         rupees = PLAN_PRICES_INR[plan][period]
     except KeyError:
         raise ValueError(f"No checkout price for plan={plan!r} period={period!r}")
+    
+    if period == "annual":
+        return rupees * 12 * 100
     return rupees * 100
 
 

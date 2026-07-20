@@ -102,8 +102,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         for header, value in _SECURITY_HEADERS.items():
             response.headers[header] = value
         # Remove any fingerprinting headers that FastAPI/uvicorn may add.
-        response.headers.pop("server", None)
-        response.headers.pop("x-powered-by", None)
+        for hdr in ("server", "x-powered-by"):
+            try:
+                del response.headers[hdr]
+            except (KeyError, AttributeError):
+                pass
         return response
 
 

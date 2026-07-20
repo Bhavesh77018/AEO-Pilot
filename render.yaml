@@ -49,3 +49,7 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
+      # Admin emails — comma-separated. These get full agency-level plan access.
+      # Set this in the Render dashboard → Environment → ADMIN_EMAILS
+      - key: ADMIN_EMAILS
+        sync: false

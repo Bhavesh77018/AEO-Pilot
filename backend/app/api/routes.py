@@ -457,33 +457,80 @@ def _project_out(project: Project) -> ProjectOut:
     )
 
 
+# Plan metadata — limits per plan key. Single source of truth for the API.
+_PLAN_META: dict[str, dict] = {
+    "starter":    {"name": "Starter",    "project_limit": 2,    "scan_limit": 5},
+    "growth":     {"name": "Growth",     "project_limit": 5,    "scan_limit": 100},
+    "agency":     {"name": "Agency",     "project_limit": 25,   "scan_limit": 9999},
+    "enterprise": {"name": "Enterprise", "project_limit": 9999, "scan_limit": 9999},
+}
+
+
 @router.get("/billing/plan")
 def get_billing_plan(
     request: Request,
+    db: Session = Depends(get_db),
     user: dict | None = Depends(get_current_user),
 ):
     """Return the active plan for the authenticated user.
 
-    Admin override is stored server-side via env var ADMIN_EMAILS (comma-separated)
-    so it never appears in source code.
+    Priority order:
+    1. Admin emails (env var ADMIN_EMAILS) → full agency access.
+    2. Active subscription in the DB tied to the user's email.
+    3. Default → starter (free).
     """
-    admin_emails_raw = settings.admin_emails  # read from env, never hardcoded
+    import logging as _log
+    _logger = _log.getLogger(__name__)
+
+    # 1. Admin override (email list stored in env, never in source code)
+    admin_emails_raw = settings.admin_emails
     admin_emails = {e.strip().lower() for e in admin_emails_raw.split(",") if e.strip()}
 
-    if user and user.get("email") and user["email"].lower() in admin_emails:
+    user_email = (user or {}).get("email", "")
+    if user_email and user_email.lower() in admin_emails:
+        _logger.info("[BILLING] Admin plan granted to %s", user_email)
         return {
             "plan": "agency",
             "name": "Admin (Full Access)",
             "project_limit": 9999,
             "scan_limit": 9999,
             "period": "lifetime",
-            "active_since": "2026-01-01T00:00:00Z"
+            "active_since": "2026-01-01T00:00:00Z",
         }
+
+    # 2. Check paid subscriptions table — most-recent active sub wins.
+    if user_email:
+        active_sub = db.scalars(
+            select(Subscription)
+            .where(
+                Subscription.email == user_email,
+                Subscription.status == "active",
+            )
+            .order_by(Subscription.updated_at.desc())
+        ).first()
+
+        if active_sub:
+            plan_key = active_sub.plan
+            meta = _PLAN_META.get(plan_key, _PLAN_META["starter"])
+            _logger.info(
+                "[BILLING] Active subscription found for %s → plan=%s",
+                user_email, plan_key,
+            )
+            return {
+                "plan": plan_key,
+                "name": meta["name"],
+                "project_limit": meta["project_limit"],
+                "scan_limit": meta["scan_limit"],
+                "period": active_sub.period,
+                "active_since": active_sub.updated_at.isoformat() if active_sub.updated_at else None,
+            }
+
+    # 3. Default: free starter plan
     return {
         "plan": "starter",
         "name": "Starter",
         "project_limit": 2,
         "scan_limit": 5,
         "period": None,
-        "active_since": None
+        "active_since": None,
     }

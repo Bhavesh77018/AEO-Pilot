@@ -149,7 +149,8 @@ function buildResponse(
   intent: Intent,
   projects: Project[],
   projectLimit: number,
-  userEmail: string | null
+  userEmail: string | null,
+  planName: string = "Starter"
 ): { type: ChatMessage["type"]; content: string } {
   switch (intent) {
     case "greet":
@@ -165,7 +166,7 @@ function buildResponse(
     case "pricing":
       return {
         type: "text",
-        content: `Here are your **investment options**:\n\n• **Starter (Free)** — 2 projects, 5 scans/month, 4 AI engines\n• **Growth (₹3,999/mo)** — 5 projects, 100 scans, all 8 engines, AI monitoring, competitor tracking\n• **Agency (₹15,999/mo)** — 25 projects, unlimited scans, white-label reports, API access\n• **Enterprise** — Custom pricing, unlimited everything, dedicated success manager\n\nYou're currently on **${userEmail ? "Starter" : "free preview"}**. Type "upgrade" or scroll to the pricing section.`,
+        content: `Here are your **investment options**:\n\n• **Starter (Free)** — 2 projects, 5 scans/month, 4 AI engines\n• **Growth (₹3,999/mo)** — 5 projects, 100 scans, all 8 engines, AI monitoring, competitor tracking\n• **Agency (₹15,999/mo)** — 25 projects, unlimited scans, white-label reports, API access\n• **Enterprise** — Custom pricing, unlimited everything, dedicated success manager\n\nYou're currently on **${userEmail ? planName : "free preview"}**. Type "upgrade" or scroll to the pricing section.`,
       };
     case "what_is_aeo":
       return {
@@ -478,7 +479,7 @@ export function ChatDashboard({
           });
         }
       } else {
-        const resp = buildResponse(intent, projects, projectLimit, userEmail);
+        const resp = buildResponse(intent, projects, projectLimit, userEmail, planName);
         setMessages((prev) => [
           ...prev,
           {

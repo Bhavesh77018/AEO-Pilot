@@ -463,7 +463,45 @@ _PLAN_META: dict[str, dict] = {
     "growth":     {"name": "Growth",     "project_limit": 5,    "scan_limit": 100},
     "agency":     {"name": "Agency",     "project_limit": 25,   "scan_limit": 9999},
     "enterprise": {"name": "Enterprise", "project_limit": 9999, "scan_limit": 9999},
+    # legacy value stored by admin panel
+    "free":       {"name": "Starter",    "project_limit": 2,    "scan_limit": 5},
 }
+
+# Map Supabase profiles.plan values → our canonical plan keys
+_PROFILE_PLAN_MAP: dict[str, str] = {
+    "free":       "starter",
+    "starter":    "starter",
+    "growth":     "growth",
+    "agency":     "agency",
+    "enterprise": "enterprise",
+}
+
+
+def _get_supabase_profile_plan(user_id: str, bearer_token: str) -> str | None:
+    """Query Supabase profiles table for this user's plan using their JWT.
+    Returns the canonical plan key or None if not found / error."""
+    if not settings.supabase_url or not settings.supabase_anon_key:
+        return None
+    try:
+        import httpx
+        url = f"{settings.supabase_url}/rest/v1/profiles?id=eq.{user_id}&select=plan&limit=1"
+        r = httpx.get(
+            url,
+            headers={
+                "apikey": settings.supabase_anon_key,
+                # Use the user's own JWT so Supabase RLS allows reading their row
+                "Authorization": f"Bearer {bearer_token}",
+            },
+            timeout=5,
+        )
+        if r.status_code == 200:
+            rows = r.json()
+            if rows and rows[0].get("plan"):
+                raw = rows[0]["plan"]
+                return _PROFILE_PLAN_MAP.get(raw, None)
+    except Exception:
+        pass
+    return None
 
 
 @router.get("/billing/plan")
@@ -476,17 +514,23 @@ def get_billing_plan(
 
     Priority order:
     1. Admin emails (env var ADMIN_EMAILS) → full agency access.
-    2. Active subscription in the DB tied to the user's email.
-    3. Default → starter (free).
+    2. Supabase profiles.plan — set by the admin panel "Give Premium" button.
+    3. Active Razorpay subscription in the local DB.
+    4. Default → starter (free).
     """
     import logging as _log
     _logger = _log.getLogger(__name__)
 
-    # 1. Admin override (email list stored in env, never in source code)
+    # 1. Admin email override
     admin_emails_raw = settings.admin_emails
     admin_emails = {e.strip().lower() for e in admin_emails_raw.split(",") if e.strip()}
 
     user_email = (user or {}).get("email", "")
+    user_id    = (user or {}).get("id", "")
+    # Extract the bearer token from the request to authenticate Supabase calls
+    auth_header = request.headers.get("authorization", "")
+    bearer_token = auth_header.split(" ", 1)[1].strip() if auth_header.lower().startswith("bearer ") else ""
+
     if user_email and user_email.lower() in admin_emails:
         _logger.info("[BILLING] Admin plan granted to %s", user_email)
         return {
@@ -498,7 +542,22 @@ def get_billing_plan(
             "active_since": "2026-01-01T00:00:00Z",
         }
 
-    # 2. Check paid subscriptions table — most-recent active sub wins.
+    # 2. Supabase profiles table (written by admin panel "Give Premium")
+    if user_id and bearer_token:
+        profile_plan = _get_supabase_profile_plan(user_id, bearer_token)
+        if profile_plan and profile_plan != "starter":
+            meta = _PLAN_META.get(profile_plan, _PLAN_META["starter"])
+            _logger.info("[BILLING] Supabase profile plan for %s → %s", user_email, profile_plan)
+            return {
+                "plan": profile_plan,
+                "name": meta["name"],
+                "project_limit": meta["project_limit"],
+                "scan_limit": meta["scan_limit"],
+                "period": "admin_grant",
+                "active_since": None,
+            }
+
+    # 3. Check paid Razorpay subscriptions table
     if user_email:
         active_sub = db.scalars(
             select(Subscription)
@@ -512,10 +571,7 @@ def get_billing_plan(
         if active_sub:
             plan_key = active_sub.plan
             meta = _PLAN_META.get(plan_key, _PLAN_META["starter"])
-            _logger.info(
-                "[BILLING] Active subscription found for %s → plan=%s",
-                user_email, plan_key,
-            )
+            _logger.info("[BILLING] Active subscription for %s → %s", user_email, plan_key)
             return {
                 "plan": plan_key,
                 "name": meta["name"],
@@ -525,7 +581,7 @@ def get_billing_plan(
                 "active_since": active_sub.updated_at.isoformat() if active_sub.updated_at else None,
             }
 
-    # 3. Default: free starter plan
+    # 4. Default: free starter plan
     return {
         "plan": "starter",
         "name": "Starter",
@@ -534,3 +590,4 @@ def get_billing_plan(
         "period": None,
         "active_since": None,
     }
+
